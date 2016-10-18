@@ -37,7 +37,7 @@ void process::parse(std::vector<std::string>& text, std::vector<process>& proces
         while (splitText != NULL){
             std::string convText(splitText);
             paramList.push_back(convText);
-            splitText = strtok(parseString, "|");
+            splitText = strtok(NULL, "|");
         }
 
         if (paramList.size() != 5)
