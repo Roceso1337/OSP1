@@ -6,26 +6,21 @@ int main(int argc, char *argv[])
 
 	std::string fname=argv[1];
 
-	FILE* fd=fopen(fname.c_str(), "r");
+
+    std::ifstream fd(fname.c_str());
+    std::string line;
+    std::vector<std::string> lines;
 
 	if(fd != NULL)
 	{
-		//get the file size
-		fseek(fd, 0, SEEK_END);
-		long fSize=ftell(fd);
-		fseek(fd, 0, SEEK_SET);
-
-		//read in the data
-		char* buffer=new char[fSize+1];
-		fread(buffer, 1, fSize, fd);
-		std::string fileContents=buffer;
-		delete buffer;
+        while (std::getline(fd, line)){
+            lines.push_back(line);
+        }
 
 		std::vector<process> processList;
-		process::parse(fileContents, processList);
+		process::parse(lines, processList);
 
-		//close the fd
-		fclose(fd);
+        fd.close();
 	}
 
     return 0;

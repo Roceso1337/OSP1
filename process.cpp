@@ -18,55 +18,38 @@ process::process(std::string newID, int newArrivalTime, int newCPUBurstTime, int
 	ioTime=newIOTime;
 }
 
-void process::parse(std::string text, std::vector<process>& processList)
+void process::parse(std::vector<std::string>& text, std::vector<process>& processList)
 {
 	processList.clear();
 
 	//go through each byte
-	for(unsigned int i=0;i<text.length();++i)
+	for(unsigned int i=0;i<text.size();++i)
 	{
-		//skip the line(s)
-		if((i == 0) || (text[i-1] == '\n'))
-		{
-			if(text[i] == '\n') continue;
-			else if(text[i] == '#')
-			{
-				while(text[i] != '\n')
-					++i;
-				continue;
-			}
+        if (text[i][0] == '#')
+            continue;
+        if (text[i].empty())
+            continue;
+        //if we made it this far, new process!
+        char* parseString = &text[i][0]; 
+        char* splitText = strtok(parseString, "|");
+        std::vector<std::string> paramList;  
 
-			//if we made it this far, new process!
+        while (splitText != NULL){
+            std::string convText(splitText);
+            paramList.push_back(convText);
+            splitText = strtok(parseString, "|");
+        }
 
-			//the id
-			size_t breakPoint=text.find('|', i);
-			if(breakPoint == std::string::npos) return;
-			std::string newID=text.substr(i, breakPoint);
-			i=breakPoint+1;
-			//the arrival time
-			breakPoint=text.find('|', i);
-			if(breakPoint == std::string::npos) return;
-			int newArrivalTime=atoi(text.substr(i, breakPoint).c_str());
-			i=breakPoint+1;
-			//the burst time
-			breakPoint=text.find('|', i);
-			if(breakPoint == std::string::npos) return;
-			int newCPUBurstTime=atoi(text.substr(i, breakPoint).c_str());
-			i=breakPoint+1;
-			//the number of bursts
-			breakPoint=text.find('|', i);
-			if(breakPoint == std::string::npos) return;
-			int newNumBursts=atoi(text.substr(i, breakPoint).c_str());
-			i=breakPoint+1;
-			//the io time
-			breakPoint=text.find('\n', i);
-			//can be std::string::npos since that end of file
-			int newIOTime=atoi(text.substr(i, breakPoint).c_str());
-			if(breakPoint > std::string::npos) i=breakPoint+1;
-			else return;
+        if (paramList.size() != 5)
+            return;
 
-			//create the process and add it to the vector
-			processList.push_back(process(newID, newArrivalTime, newCPUBurstTime, newNumBursts, newIOTime));
-		}
+        std::string newID = paramList[0];
+        int newArrivalTime = atoi(paramList[1].c_str());
+        int newCPUBurstTime = atoi(paramList[2].c_str());
+        int newNumBursts = atoi(paramList[3].c_str());
+        int newIOTime = atoi(paramList[4].c_str());
+
+        //create the process and add it to the vector
+        processList.push_back(process(newID, newArrivalTime, newCPUBurstTime, newNumBursts, newIOTime));
 	}
 }

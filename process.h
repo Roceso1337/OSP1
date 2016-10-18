@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <string>
 #include <vector>
 #include "main.h"
@@ -23,7 +24,7 @@ public:
 	//<proc-id>|<initial-arrival-time>|<cpu-burst-time>|<num-bursts>|<io-time>
 	process();
 	process(std::string, int, int, int, int);
-	static void parse(std::string, std::vector<process>&);
+	static void parse(std::vector<std::string>&, std::vector<process>&);
 };
 
 #endif
