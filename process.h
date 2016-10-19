@@ -25,6 +25,11 @@ public:
 	process();
 	process(std::string, int, int, int, int);
 	static void parse(std::vector<std::string>&, std::vector<process>&);
+    std::string getID();
+    int getArrivalTime();
+    int getCPUBurst();
+    int getNumBursts();
+    int getIOTime();
 };
 
 #endif

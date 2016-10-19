@@ -53,3 +53,23 @@ void process::parse(std::vector<std::string>& text, std::vector<process>& proces
         processList.push_back(process(newID, newArrivalTime, newCPUBurstTime, newNumBursts, newIOTime));
 	}
 }
+
+std::string process::getID(){
+    return id;
+}
+
+int process::getArrivalTime(){
+    return arrivalTime;
+}
+
+int process::getCPUBurst(){
+    return cpuBurstTime;
+}
+
+int process::getNumBursts(){
+    return numBursts;
+}
+
+int process::getIOTime(){
+    return ioTime;
+}
