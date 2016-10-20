@@ -10,6 +10,7 @@
 #include <string>
 #include <algorithm>
 #include "main.h"
+#include <sstream>
 
 class process
 {
@@ -39,6 +40,12 @@ public:
 
 	static bool SJTComp(const process &p1, const process &p2){
 		return p1.cpuBurstTime < p2.cpuBurstTime;
+	}
+
+	std::string printTime(int i){
+		std::stringstream time;
+		time << i;
+		return "time " + time.str() +"ms: ";
 	}
 };
 
