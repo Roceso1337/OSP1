@@ -26,6 +26,21 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+void FCFS(const std::vector<process>& processList)
+{
+	//
+}
+
+void SJF(const std::vector<process>& processList)
+{
+	//
+}
+
+void roundRobin(const std::vector<process>& processList)
+{
+	//
+}
+
 void err(const char *msg)
 {
 	fprintf(stderr, "%s", msg);

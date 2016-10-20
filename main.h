@@ -10,6 +10,11 @@
 #include <vector>
 #include "process.h"
 
+struct process;
+
+void FCFS(const std::vector<process>&);
+void SJF(const std::vector<process>&);
+void roundRobin(const std::vector<process>&);
 void err(const char*);
 
 #endif
