@@ -21,6 +21,8 @@ private:
 	int cpuBurstTime;
 	int numBursts;
 	int ioTime;
+    int cpuBurstStart;
+    int cpuBurstEnd;
 
 public:
 
@@ -33,6 +35,10 @@ public:
     int getCPUBurst();
     int getNumBursts();
     int getIOTime();
+    int getCpuBurstStart();
+    int getBurstEnd();
+    void setCpuBurstStart(int time);
+    void setCpuBurstEnd(int time); 
 
 	static bool FCFSComp(const process &p1, const process &p2){
 		return p1.arrivalTime < p2.arrivalTime;

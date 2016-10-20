@@ -24,6 +24,8 @@ int main(int argc, char *argv[])
         int t_cs = 8;
         int t_slice = 84;
 
+        SJF(processList, t_cs);
+
         fd.close();
 	}
 
@@ -75,17 +77,32 @@ void SJF(std::deque<process> processList, int t_cs)
     std::deque<process> readyQueue;
     bool busy = false;
 
-    std::cout << "time " << timeElapsed << "ms: Simulator started for SJF " << std::endl;
+    std::cout << "time " << timeElapsed << "ms: Simulator started for SJF " 
+        << queueToString(readyQueue) << std::endl;
 
     while (1){
+        for (std::deque<process>::iterator itr = processList.begin(); itr != processList.end(); itr++){
+            if (itr->getArrivalTime() <= timeElapsed){
+                readyQueue.push_back(*itr);
+                std::cout << "time " << timeElapsed << "ms: Process " 
+                    << itr->getID() << " arrived " << queueToString(readyQueue) << std::endl;
+                processList.erase(itr);
+            }
+
+            if (itr == processList.end())
+                break;
+        }
+
+        std::sort(readyQueue.begin(), readyQueue.end(), process::SJTComp);
+
         //can start a new process
-        if (!busy && currentProcess == NULL){
-            process p = processList.front();
-            process currentProcess = p;
+        if (!busy && !readyQueue.empty()){
+            process currentProcess  = readyQueue.front();
             busy = true;
-            std::cout << "TIME PLACEHOLDER: Process " << p.getID() 
+            std::cout << "TIME PLACEHOLDER: Process " << currentProcess.getID() 
                 << " arrived " << queueToString(readyQueue) << std::endl;
         }    
+
     }
 }
 
