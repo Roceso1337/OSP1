@@ -30,6 +30,10 @@ public:
     int getCPUBurst();
     int getNumBursts();
     int getIOTime();
+
+	bool operator<(const process &p){
+		return this->arrivalTime < p.arrivalTime;
+	}
 };
 
 #endif
