@@ -95,3 +95,19 @@ int process::getNumBurstsLeft(){
 int process::getIOTime(){
     return ioTime;
 }
+
+int process::getCpuBurstStart(){
+    return cpuBurstStart;
+}
+
+int process::getBurstEnd(){
+    return cpuBurstEnd;
+}
+
+void process::setCpuBurstStart(int time){
+    cpuBurstStart = time;
+}
+
+void process::setCpuBurstEnd(int time){ 
+    cpuBurstEnd = time;
+}

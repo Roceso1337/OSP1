@@ -10,6 +10,7 @@
 #include <string>
 #include <algorithm>
 #include "main.h"
+#include <sstream>
 
 class process
 {
@@ -25,6 +26,8 @@ private:
 	int ioTime;
 	bool cpu;
 	bool io;
+    int cpuBurstStart;
+    int cpuBurstEnd;
 
 public:
 
@@ -41,6 +44,10 @@ public:
     void decrementNumBurstsLeft();
     int getNumBurstsLeft();
     int getIOTime();
+    int getCpuBurstStart();
+    int getBurstEnd();
+    void setCpuBurstStart(int time);
+    void setCpuBurstEnd(int time); 
 
 	static bool FCFSComp(const process &p1, const process &p2){
 		if(p1.arrivalTime == p2.arrivalTime) return p1.id < p2.id;
@@ -50,6 +57,12 @@ public:
 	static bool SJTComp(const process &p1, const process &p2){
 		if(p1.cpuBurstTime == p2.cpuBurstTime) return p1.id < p2.id;
 		return p1.cpuBurstTime < p2.cpuBurstTime;
+	}
+
+	std::string printTime(int i){
+		std::stringstream time;
+		time << i;
+		return "time " + time.str() +"ms: ";
 	}
 };
 
