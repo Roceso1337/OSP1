@@ -347,6 +347,7 @@ void SJF(std::deque<process> processList, int t_cs)
     int timeElapsed = 0;
     process* currentProcess = new process();
     std::deque<process> readyQueue;
+    std::deque<process> ioQueue;
     bool busy = false;
 
     std::cout << "time " << timeElapsed << "ms: Simulator started for SJF " 
@@ -356,7 +357,7 @@ void SJF(std::deque<process> processList, int t_cs)
         for (std::deque<process>::iterator itr = processList.begin(); itr != processList.end(); itr++){
             if (itr->getArrivalTime() <= timeElapsed){
                 readyQueue.push_back(*itr);
-                std::cout << "time " << timeElapsed << "ms: Process " 
+                std::cout << process::printTime(elapsedTime) << " Process " 
                     << itr->getID() << " arrived " << queueToString(readyQueue) << std::endl;
                 processList.erase(itr);
             }
@@ -369,10 +370,14 @@ void SJF(std::deque<process> processList, int t_cs)
 
         //can start a new process
         if (!busy && !readyQueue.empty()){
-            process currentProcess  = readyQueue.front();
+            currentProcess  = *readyQueue.front();
             busy = true;
-            std::cout << "TIME PLACEHOLDER: Process " << currentProcess.getID() 
+            std::cout << process::printTime(elaspedTime) << " Process " << currentProcess.getID() 
                 << " arrived " << queueToString(readyQueue) << std::endl;
+            readyQueue.pop_front();
+            if (currentProcess.getNumBurstsLeft() > 0)
+                currentProcess.decrementNumBurstLeft();
+                readyQueue.push_back(currentProcess);
         }    
 
     }
