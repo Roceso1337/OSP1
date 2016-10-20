@@ -52,6 +52,7 @@ void process::parse(std::vector<std::string>& text, std::vector<process>& proces
         //create the process and add it to the vector
         processList.push_back(process(newID, newArrivalTime, newCPUBurstTime, newNumBursts, newIOTime));
 	}
+    std::sort(processList.begin(), processList.end());
 }
 
 std::string process::getID(){

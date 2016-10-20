@@ -28,7 +28,23 @@ int main(int argc, char *argv[])
 
 void FCFS(const std::vector<process>& processList)
 {
-	//
+	std::queue<process> q;
+	for(int i=0;i<processList.size();++i)
+		q.push(processList[i]);
+
+	//"run the processes"
+	while(q.size() > 0)
+	{
+		//set the process variable
+		process p=q.front();
+		q.pop();
+
+		//run the process
+		for()
+		{
+			//
+		}
+	}
 }
 
 void SJF(const std::vector<process>& processList)
