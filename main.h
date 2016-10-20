@@ -1,6 +1,7 @@
 #ifndef _MAIN
 #define _MAIN
 
+#include <queue>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

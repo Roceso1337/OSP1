@@ -26,6 +26,24 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+std::string queueToString(std::queue<process> queue){
+    if (queue.empty()){
+        return "[Q empty]";
+    }
+    std::string queueString = "[";
+
+    while (!queue.empty()){
+        queueString += queue.front().getID();
+        queue.pop();
+
+        if (!queue.empty())
+            queueString += " ";
+    }
+    
+    queueString += "]";
+    return queueString;
+}
+
 void FCFS(const std::vector<process>& processList)
 {
 	//
@@ -33,7 +51,9 @@ void FCFS(const std::vector<process>& processList)
 
 void SJF(const std::vector<process>& processList)
 {
-	//
+    int timeElapsed = 0;
+    std::cout << "time " << timeElapsed << "ms: Simulator started for SJF " << std::endl;
+
 }
 
 void roundRobin(const std::vector<process>& processList)
