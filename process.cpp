@@ -18,7 +18,7 @@ process::process(std::string newID, int newArrivalTime, int newCPUBurstTime, int
 	ioTime=newIOTime;
 }
 
-void process::parse(std::vector<std::string>& text, std::queue<process>& processList)
+void process::parse(std::vector<std::string>& text, std::deque<process>& processList)
 {
 	//go through each byte
 	for(unsigned int i=0;i<text.size();++i)
@@ -48,7 +48,7 @@ void process::parse(std::vector<std::string>& text, std::queue<process>& process
         int newIOTime = atoi(paramList[4].c_str());
 
         //create the process and add it to the queue
-        processList.push(process(newID, newArrivalTime, newCPUBurstTime, newNumBursts, newIOTime));
+        processList.push_back(process(newID, newArrivalTime, newCPUBurstTime, newNumBursts, newIOTime));
 	}
 }
 
