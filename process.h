@@ -16,10 +16,15 @@ class process
 private:
 
 	std::string id;
+	int initialArrivalTime;
 	int arrivalTime;
+	int EndTime;
 	int cpuBurstTime;
 	int numBursts;
+	int numBurstsLeft;
 	int ioTime;
+	bool cpu;
+	bool io;
 
 public:
 
@@ -28,10 +33,18 @@ public:
 	process(std::string, int, int, int, int);
 	static void parse(std::vector<std::string>&, std::queue<process>&);
     std::string getID();
+    int getInitialArrivalTime();
     int getArrivalTime();
+    void setArrivalTime(int);
     int getCPUBurst();
     int getNumBursts();
+    void decrementNumBurstsLeft();
+    int getNumBurstsLeft();
     int getIOTime();
+    bool isCPU();
+    bool isIO();
+    void setCPU(bool);
+    void setIO(bool);
 
 	static bool FCFSComp(const process &p1, const process &p2){
 		return p1.arrivalTime < p2.arrivalTime;

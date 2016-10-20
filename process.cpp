@@ -3,19 +3,29 @@
 process::process()
 {
 	id="";
+    initialArrivalTime=-1;
 	arrivalTime=-1;
+    EndTime=-1;
 	cpuBurstTime=-1;
 	numBursts=-1;
+    numBurstsLeft=-1;
 	ioTime=-1;
+    cpu=false;
+    io=false;
 }
 
 process::process(std::string newID, int newArrivalTime, int newCPUBurstTime, int newNumBursts, int newIOTime)
 {
 	id=newID;
-	arrivalTime=newArrivalTime;
+    initialArrivalTime=newArrivalTime;
+	arrivalTime=initialArrivalTime;
+    EndTime=0;
 	cpuBurstTime=newCPUBurstTime;
 	numBursts=newNumBursts;
+    numBurstsLeft=numBursts;
 	ioTime=newIOTime;
+    cpu=false;
+    io=false;
 }
 
 void process::parse(std::vector<std::string>& text, std::queue<process>& processList)
@@ -56,8 +66,16 @@ std::string process::getID(){
     return id;
 }
 
+int process::getInitialArrivalTime(){
+    return initialArrivalTime;
+}
+
 int process::getArrivalTime(){
     return arrivalTime;
+}
+
+void process::setArrivalTime(int newArrivalTime){
+    arrivalTime=newArrivalTime;
 }
 
 int process::getCPUBurst(){
@@ -68,6 +86,30 @@ int process::getNumBursts(){
     return numBursts;
 }
 
+void process::decrementNumBurstsLeft(){
+    --numBurstsLeft;
+}
+
+int process::getNumBurstsLeft(){
+    return numBurstsLeft;
+}
+
 int process::getIOTime(){
     return ioTime;
+}
+
+bool process::isCPU(){
+    return cpu;
+}
+
+bool process::isIO(){
+    return io;
+}
+
+void process::setCPU(bool newCPU){
+    cpu=newCPU;
+}
+
+void process::setIO(bool newIO){
+    io=newIO;
 }
