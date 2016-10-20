@@ -10,8 +10,6 @@ process::process()
 	numBursts=-1;
     numBurstsLeft=-1;
 	ioTime=-1;
-    cpu=false;
-    io=false;
 }
 
 process::process(std::string newID, int newArrivalTime, int newCPUBurstTime, int newNumBursts, int newIOTime)
@@ -24,13 +22,13 @@ process::process(std::string newID, int newArrivalTime, int newCPUBurstTime, int
 	numBursts=newNumBursts;
     numBurstsLeft=numBursts;
 	ioTime=newIOTime;
-    cpu=false;
-    io=false;
 }
 
-void process::parse(std::vector<std::string>& text, std::queue<process>& processList)
+void process::parse(std::vector<std::string>& text, std::deque<process>& processList)
 {
-	//go through each byte
+	processList.clear();
+
+    //go through each byte
 	for(unsigned int i=0;i<text.size();++i)
 	{
         if (text[i][0] == '#')
@@ -49,7 +47,7 @@ void process::parse(std::vector<std::string>& text, std::queue<process>& process
         }
 
         if (paramList.size() != 5)
-            return;
+            exit(EXIT_FAILURE);
 
         std::string newID = paramList[0];
         int newArrivalTime = atoi(paramList[1].c_str());
@@ -58,7 +56,7 @@ void process::parse(std::vector<std::string>& text, std::queue<process>& process
         int newIOTime = atoi(paramList[4].c_str());
 
         //create the process and add it to the queue
-        processList.push(process(newID, newArrivalTime, newCPUBurstTime, newNumBursts, newIOTime));
+        processList.push_back(process(newID, newArrivalTime, newCPUBurstTime, newNumBursts, newIOTime));
 	}
 }
 
@@ -78,7 +76,7 @@ void process::setArrivalTime(int newArrivalTime){
     arrivalTime=newArrivalTime;
 }
 
-int process::getCPUBurst(){
+int process::getCPUBurstTime(){
     return cpuBurstTime;
 }
 
@@ -96,20 +94,4 @@ int process::getNumBurstsLeft(){
 
 int process::getIOTime(){
     return ioTime;
-}
-
-bool process::isCPU(){
-    return cpu;
-}
-
-bool process::isIO(){
-    return io;
-}
-
-void process::setCPU(bool newCPU){
-    cpu=newCPU;
-}
-
-void process::setIO(bool newIO){
-    io=newIO;
 }
