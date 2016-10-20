@@ -11,9 +11,9 @@
 
 struct process;
 
-void FCFS(const std::queue<process>&);
-void SJF(const std::queue<process>&);
-void roundRobin(const std::queue<process>&);
+void FCFS(std::deque<process>);
+void SJF(std::deque<process>);
+void roundRobin(std::deque<process>);
 void err(const char*);
 
 #endif
