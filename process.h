@@ -27,7 +27,7 @@ public:
 	//<proc-id>|<initial-arrival-time>|<cpu-burst-time>|<num-bursts>|<io-time>
 	process();
 	process(std::string, int, int, int, int);
-	static void parse(std::vector<std::string>&, std::queue<process>&);
+	static void parse(std::vector<std::string>&, std::deque<process>&);
     std::string getID();
     int getArrivalTime();
     int getCPUBurst();
