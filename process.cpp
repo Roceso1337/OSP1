@@ -3,24 +3,32 @@
 process::process()
 {
 	id="";
+    initialArrivalTime=-1;
 	arrivalTime=-1;
+    EndTime=-1;
 	cpuBurstTime=-1;
 	numBursts=-1;
+    numBurstsLeft=-1;
 	ioTime=-1;
 }
 
 process::process(std::string newID, int newArrivalTime, int newCPUBurstTime, int newNumBursts, int newIOTime)
 {
 	id=newID;
-	arrivalTime=newArrivalTime;
+    initialArrivalTime=newArrivalTime;
+	arrivalTime=initialArrivalTime;
+    EndTime=0;
 	cpuBurstTime=newCPUBurstTime;
 	numBursts=newNumBursts;
+    numBurstsLeft=numBursts;
 	ioTime=newIOTime;
 }
 
 void process::parse(std::vector<std::string>& text, std::deque<process>& processList)
 {
-	//go through each byte
+	processList.clear();
+
+    //go through each byte
 	for(unsigned int i=0;i<text.size();++i)
 	{
         if (text[i][0] == '#')
@@ -39,7 +47,7 @@ void process::parse(std::vector<std::string>& text, std::deque<process>& process
         }
 
         if (paramList.size() != 5)
-            return;
+            exit(EXIT_FAILURE);
 
         std::string newID = paramList[0];
         int newArrivalTime = atoi(paramList[1].c_str());
@@ -56,16 +64,32 @@ std::string process::getID(){
     return id;
 }
 
+int process::getInitialArrivalTime(){
+    return initialArrivalTime;
+}
+
 int process::getArrivalTime(){
     return arrivalTime;
 }
 
-int process::getCPUBurst(){
+void process::setArrivalTime(int newArrivalTime){
+    arrivalTime=newArrivalTime;
+}
+
+int process::getCPUBurstTime(){
     return cpuBurstTime;
 }
 
 int process::getNumBursts(){
     return numBursts;
+}
+
+void process::decrementNumBurstsLeft(){
+    --numBurstsLeft;
+}
+
+int process::getNumBurstsLeft(){
+    return numBurstsLeft;
 }
 
 int process::getIOTime(){

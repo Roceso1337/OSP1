@@ -1,5 +1,5 @@
-Robert Carneiro, Dan Sze
+Robert Carneiro, Dan Sze, Brendan Courson
 Project 1
 
 How to run:
-./exec filename
+./exec in.txt out.txt
