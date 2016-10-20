@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
             lines.push_back(line);
         }
 
-		std::vector<process> processList;
+		std::queue<process> processList;
 		process::parse(lines, processList);
 
         fd.close();
@@ -44,19 +44,31 @@ std::string queueToString(std::queue<process> queue){
     return queueString;
 }
 
-void FCFS(const std::vector<process>& processList)
+void FCFS(std::queue<process> processList)
 {
-	//
+	//"run the processes"
+	while(processList.size() > 0)
+	{
+		//set the process variable
+		process p=processList.front();
+		processList.pop();
+
+		//run the process
+		/*for(int i=0;i<process.;++i)
+		{
+			//
+		}*/
+	}
 }
 
-void SJF(const std::vector<process>& processList)
+void SJF(const std::queue<process>& processList)
 {
     int timeElapsed = 0;
     std::cout << "time " << timeElapsed << "ms: Simulator started for SJF " << std::endl;
 
 }
 
-void roundRobin(const std::vector<process>& processList)
+void roundRobin(const std::queue<process>& processList)
 {
 	//
 }
