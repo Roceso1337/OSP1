@@ -2,7 +2,7 @@
 
 int main(int argc, char *argv[])
 {
-	if(argc < 2) err("Invalid arguments\n");
+	if(argc < 3) err("Invalid arguments\n");
 
 	std::string fname=argv[1];
 
@@ -101,7 +101,7 @@ void FCFS(std::queue<process> processList)
 
 			addBack=true;
 			cpuAddBack=true;
-			//p.setArrivalTime(backP.getArrivalTime()+4);
+			p.setArrivalTime(timeElapsed+4);
 			p.setCPU(false);
 			p.setIO(false);
 		}
