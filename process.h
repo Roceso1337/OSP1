@@ -7,6 +7,7 @@
 #include <string.h>
 #include <string>
 #include <vector>
+#include <algorithm>
 #include "main.h"
 
 class process
