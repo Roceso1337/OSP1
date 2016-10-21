@@ -24,11 +24,11 @@ private:
 	int numBursts;
 	int numBurstsLeft;
 	int ioTime;
-	bool cpu;
-	bool io;
-	int cpuBurstStart;
-	int cpuBurstEnd;
-	int cpuBurstTimeLeft; //for RR
+    int timeRunning;
+    int cpuBurstStart;
+    int cpuBurstEnd;
+    int ioEndTime;
+    int cpuBurstTimeLeft; //for RR
 
 public:
 
@@ -36,19 +36,25 @@ public:
 	process();
 	process(std::string, int, int, int, int);
 	static void parse(std::vector<std::string>&, std::deque<process>&);
-	std::string getID();
-	int getInitialArrivalTime();
-	int getArrivalTime();
-	void setArrivalTime(int);
-	int getCPUBurstTime();
-	int getNumBursts();
-	void decrementNumBurstsLeft();
-	int getNumBurstsLeft();
-	int getIOTime();
-	int getCpuBurstStart();
-	int getBurstEnd();
-	void setCpuBurstStart(int time);
-	void setCpuBurstEnd(int time); 
+
+    std::string getID();
+    int getInitialArrivalTime();
+    int getArrivalTime();
+    void setArrivalTime(int);
+    int getCPUBurstTime();
+    int getNumBursts();
+    void decrementNumBurstsLeft();
+    int getNumBurstsLeft();
+    int getIOTime();
+    int getCpuBurstStart();
+    int getBurstEnd();
+    int getIOEnd();
+    int getTimeRunning() { return timeRunning; }
+    void setIOEnd(int);
+    void setCpuBurstStart(int);
+    void setCpuBurstEnd(int); 
+    void increaseTimeRunning() { timeRunning++; }
+    void setTimeRunning(int time) { timeRunning = time; }
 
 	static bool FCFSComp(const process &p1, const process &p2){
 		if(p1.arrivalTime == p2.arrivalTime) return p1.id < p2.id;
@@ -60,7 +66,12 @@ public:
 		return p1.cpuBurstTime < p2.cpuBurstTime;
 	}
 
-	std::string printTime(int i){
+
+	static bool IOComp(const process &p1, const process &p2){
+        return p1.ioEndTime > p2.ioEndTime;
+	}
+
+	static std::string printTime(int i){
 		std::stringstream time;
 		time << i;
 		return "time " + time.str() +"ms: ";
