@@ -7,13 +7,16 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include "process.h"
 
 struct process;
 
+std::string intTOstring(int);
+std::string floatTOstring(float);
 std::string queueToString(std::deque<process>);
-void sortFCFS(std::deque<process>&);
-void FCFS(std::deque<process>, int);
+void sortFCFS(std::deque<process>&, std::deque<process>&, std::deque<process>&);
+void FCFS(std::deque<process>, int, float&, float&, float&, int&);
 void SJF(std::deque<process>, int);
 void roundRobin(std::deque<process>);
 void err(const char*);
