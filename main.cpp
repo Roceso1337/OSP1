@@ -1,3 +1,6 @@
+//Robert Carneiro
+//Dan Sze
+//Brendan Courson
 #include "main.h"
 
 int main(int argc, char *argv[])
