@@ -19,14 +19,14 @@ int main(int argc, char *argv[])
 
 		std::deque<process> processList;
 		process::parse(lines, processList);
-		FCFS(processList);
+		FCFS(processList, 8);
 
-        int n = lines.size();
-        int m = 1;
-        int t_cs = 8;
-        int t_slice = 84;
+        //int n = lines.size();
+        //int m = 1;
+        //int t_cs = 8;
+        //int t_slice = 84;
 
-        SJF(processList, t_cs);
+        //SJF(processList, t_cs);
 
         fd.close();
 	}
@@ -59,10 +59,9 @@ void sortFCFS(std::deque<process>& processList, std::deque<process>& cpuQ, std::
 	std::sort(ioQ.begin(), ioQ.end(), process::FCFSComp);
 }
 
-void FCFS(std::deque<process> processList)
+void FCFS(std::deque<process> processList, int t_cs)
 {
 	//int m=1;
-	int t_cs=8;
 	process running=process();
 
 	std::deque<process> cpuQ;
@@ -110,7 +109,12 @@ void FCFS(std::deque<process> processList)
 				if(!cpuQ.empty())
 					ap.setArrivalTime(cpuQ.back().getArrivalTime()+t_cs);
 				else
-					ap.setArrivalTime(timeElapsed+t_cs);
+				{
+					if(running.getID() != "")
+						ap.setArrivalTime(running.getArrivalTime()+(t_cs));
+					else
+						ap.setArrivalTime(timeElapsed+(t_cs/2));
+				}
 
 				//set some data
 				taskCompleted=true;
@@ -121,7 +125,7 @@ void FCFS(std::deque<process> processList)
 			}
 		}
 
-		if(!taskCompleted)
+		if((!taskCompleted) && (running.getID() != ""))//cpu
 		{
 			if(((cpuQ.empty()) || (running.getArrivalTime() < cpup.getArrivalTime())) &&
 				((ioQ.empty()) || (running.getArrivalTime() < iop.getArrivalTime())))
@@ -143,85 +147,86 @@ void FCFS(std::deque<process> processList)
 					//IO blocked
 					std::cout<<"time "<<timeElapsed<<"ms: ";
 					std::cout<<"Process "<<running.getID()<<" blocked on I/O until time ";
-					std::cout<<(running.getArrivalTime())<<"ms";
+					std::cout<<(timeElapsed+running.getIOTime())<<"ms";
 
 					//set the new arrival time
 					running.setArrivalTime(timeElapsed+running.getIOTime());
 
-					//set some data
-					running=process();
-
 					//change the deques
-					cpuQ.pop_front();
 					ioQ.push_back(running);
+
+					//clear running
+					running=process();
 				}
 				else//no more bursts left
 				{
-					std::cout<<"Process "<<cpup.getID()<<" terminated ";
+					std::cout<<"Process "<<running.getID()<<" terminated ";
 
 					//set the new arrival time
-					cpup.setArrivalTime(timeElapsed+cpup.getInitialArrivalTime());
+					running.setArrivalTime(timeElapsed+running.getInitialArrivalTime());
 
-					//set some data
+					//clear running
 					running=process();
-
-					//change the deques
-					cpuQ.pop_front();
 				}
 
 				taskCompleted=true;
 			}
 		}
 
-		if(!taskCompleted)//cpu and io
+		if((!taskCompleted) && (running.getID() == ""))//cpu start
 		{
-			//cpu or io
-			bool doCPU=false;
 			if(!cpuQ.empty())
 			{
 				if((ioQ.empty()) || (cpup.getArrivalTime() < iop.getArrivalTime()))
-					doCPU=true;
+				{
+					//set the timeElapsed and print
+					timeElapsed=cpup.getArrivalTime();
+					std::cout<<"time "<<timeElapsed<<"ms: ";
+
+					std::cout<<"Process "<<cpup.getID()<<" started using the CPU ";
+
+					//set the new arrival times
+					cpup.setArrivalTime(timeElapsed+cpup.getCPUBurstTime());
+					for(unsigned int i=0;i<cpuQ.size();++i)
+						cpuQ[i].setArrivalTime(cpuQ[i].getArrivalTime()+cpup.getCPUBurstTime());
+
+					//set some data
+					running=cpup;
+					taskCompleted=true;
+
+					//change the deques
+					cpuQ.pop_front();
+				}
 			}
+		}
 
-			if(doCPU)//cpu
-			{
-				//set the timeElapsed and print
-				timeElapsed=cpup.getArrivalTime();
-				std::cout<<"time "<<timeElapsed<<"ms: ";
-
-				std::cout<<"Process "<<cpup.getID()<<" started using the CPU ";
-
-				//set the new arrival times
-				cpup.setArrivalTime(timeElapsed+cpup.getCPUBurstTime());
-				for(unsigned int i=0;i<cpuQ.size();++i)
-					cpuQ[i].setArrivalTime(cpuQ[i].getArrivalTime()+cpup.getCPUBurstTime());
-
-				//set some data
-				running=cpup;
-
-				//change the deques
-				cpuQ.pop_front();
-			}
-			else//io
+		if(!taskCompleted)//io
+		{
+			if(!ioQ.empty())
 			{
 				//set the timeElapsed and print
 				timeElapsed=iop.getArrivalTime();
 				std::cout<<"time "<<timeElapsed<<"ms: ";
+				std::cout<<"Process "<<iop.getID()<<" completed I/O ";
 
-				if(!ioQ.empty())
+				//set the new arrival time
+				//set the new arrival time
+				if(!cpuQ.empty())
+					iop.setArrivalTime(cpuQ.back().getArrivalTime()+t_cs);
+				else
 				{
-					std::cout<<"Process "<<iop.getID()<<" completed I/O ";
-
-					//set the timeElapsed
-					timeElapsed=iop.getArrivalTime();
-
-					//set the new arrival time
-					iop.setArrivalTime(timeElapsed+t_cs);
-
-					//change the deques
-					cpuQ.push_back(iop);
-					ioQ.pop_front();
+					if(running.getID() != "")
+						iop.setArrivalTime(running.getArrivalTime()+(t_cs));
+					else
+						iop.setArrivalTime(timeElapsed+(t_cs/2));
 				}
+
+				//set some data
+				taskCompleted=true;
+
+				//change the deques
+				cpuQ.push_back(iop);
+				ioQ.pop_front();
 			}
 		}
 
@@ -230,114 +235,11 @@ void FCFS(std::deque<process> processList)
 		//sort
 		sortFCFS(processList, cpuQ, ioQ);
 	}
+
+	timeElapsed+=4;
+
+	std::cout<<"time "<<timeElapsed<<"ms: Simulator ended for FCFS"<<std::endl;
 }
-
-/*void FCFS(std::deque<process> processList)
-{
-	//int m=1;
-	int t_cs=8;
-
-	std::deque<process> cpuQ;
-	std::cout<<"time 0ms: Simulator started for FCFS ";
-	std::cout<<queueToString(cpuQ)<<std::endl;
-
-	//sort the processes
-	sortFCFS(processList);
-
-	//"run the processes"
-	int timeElapsed=0;
-	while(processList.size() > 0)
-	{
-		//set the process variable
-		bool addBack=false;
-		bool cpuAddBack=false;
-		process p=processList.front();
-		processList.pop_front();
-
-		//time elapsed so far
-		timeElapsed=p.getArrivalTime();
-		std::cout<<"time "<<timeElapsed<<"ms: ";
-
-		//arrival time
-		if(timeElapsed == p.getInitialArrivalTime())
-		{
-			std::cout<<"Process "<<p.getID()<<" arrived ";
-
-			addBack=true;
-			cpuAddBack=true;
-			p.setArrivalTime(timeElapsed+t_cs);
-			p.setCPU(false);
-			p.setIO(false);
-		}
-		else//CPU and IO
-		{
-			if(!p.isCPU() && !p.isIO())
-			{
-				//the burst
-				std::cout<<"Process "<<p.getID()<<" started using the CPU ";
-
-				addBack=true;
-				cpuAddBack=false;
-				cpuQ.pop_front();
-				p.setArrivalTime(timeElapsed+p.getInitialArrivalTime());
-				p.setCPU(true);
-				p.setIO(false);
-			}
-			else if(p.isCPU())
-			{
-				//do a burst
-				p.decrementNumBurstsLeft();
-
-				//just another burst
-				if(p.getNumBurstsLeft() > 0)
-				{
-					std::cout<<"Process "<<p.getID()<<" completed a CPU burst; ";
-					std::cout<<p.getNumBurstsLeft()<<" to go ";
-					std::cout<<queueToString(cpuQ)<<std::endl;
-
-					//IO blocked
-					std::cout<<"time "<<timeElapsed<<"ms: ";
-					std::cout<<"Process "<<p.getID()<<" blocked on I/O until time ";
-					std::cout<<(p.getArrivalTime())<<"ms";
-
-					addBack=true;
-					cpuAddBack=false;
-					p.setArrivalTime(timeElapsed+p.getIOTime());
-					p.setCPU(false);
-					p.setIO(true);
-				}
-				else//no more bursts left
-				{
-					std::cout<<"Process "<<p.getID()<<" terminated ";
-
-					addBack=false;
-					cpuAddBack=false;
-					p.setCPU(false);
-					p.setIO(false);
-				}
-			}
-			else if(p.isIO())
-			{
-				std::cout<<"Process "<<p.getID()<<" completed I/O ";
-
-				addBack=true;
-				cpuAddBack=true;
-				p.setArrivalTime(timeElapsed+t_cs);
-				p.setCPU(true);
-				p.setIO(false);
-			}
-		}
-
-		//add the p to the qs if necassary
-		if(cpuAddBack) cpuQ.push_back(p);
-		if(addBack) processList.push_back(p);
-
-		std::cout<<queueToString(cpuQ)<<std::endl;
-
-		//sort the processes
-		sortFCFS(processList);
-	}
-}*/
 
 // make temporary "current" process
 // make new queue of ready queue
@@ -345,7 +247,7 @@ void FCFS(std::deque<process> processList)
 void SJF(std::deque<process> processList, int t_cs)
 {
     int timeElapsed = 0;
-    process* currentProcess = new process();
+    //process* currentProcess = new process();
     std::deque<process> readyQueue;
     bool busy = false;
 
