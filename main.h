@@ -11,8 +11,10 @@
 
 struct process;
 
+std::string queueToString(std::deque<process>);
+void sortFCFS(std::deque<process>&);
 void FCFS(std::deque<process>);
-void SJF(std::deque<process>);
+void SJF(std::deque<process>, int);
 void roundRobin(std::deque<process>);
 void err(const char*);
 
