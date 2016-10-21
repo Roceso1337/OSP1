@@ -17,7 +17,7 @@ std::string floatTOstring(float);
 std::string queueToString(std::deque<process>);
 void sortFCFS(std::deque<process>&, std::deque<process>&, std::deque<process>&);
 void FCFS(std::deque<process>, int, float&, float&, float&, int&);
-void SJF(std::deque<process>, int);
+void SJF(std::deque<process>, int, float&, float&, float&, int&);
 void roundRobin(std::deque<process> processList, int t_cs, int t_slice);
 void err(const char*);
 void sortRR(std::deque<process>& processList);
