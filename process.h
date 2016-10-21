@@ -24,6 +24,8 @@ private:
 	int numBursts;
 	int numBurstsLeft;
 	int ioTime;
+	bool cpu;
+	bool io;
     int timeRunning;
     int cpuBurstStart;
     int cpuBurstEnd;
@@ -33,6 +35,7 @@ public:
 
 	//<proc-id>|<initial-arrival-time>|<cpu-burst-time>|<num-bursts>|<io-time>
 	process();
+    process(const process&);
 	process(std::string, int, int, int, int);
 	static void parse(std::vector<std::string>&, std::deque<process>&);
     std::string getID();
@@ -66,7 +69,7 @@ public:
 
 
 	static bool IOComp(const process &p1, const process &p2){
-        return p1.ioEndTime > p2.ioEndTime;
+        return p1.ioEndTime < p2.ioEndTime;
 	}
 
 	static std::string printTime(int i){
