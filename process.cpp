@@ -103,6 +103,13 @@ int process::getCpuBurstStart(){
 int process::getBurstEnd(){
     return cpuBurstEnd;
 }
+int process::getIOEnd(){
+    return ioEndTime;
+}
+
+void process::setIOEnd(int time){
+    ioEndTime = time;
+}
 
 void process::setCpuBurstStart(int time){
     cpuBurstStart = time;
