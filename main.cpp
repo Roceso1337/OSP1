@@ -1,5 +1,5 @@
+//Daniel Sze
 //Robert Carneiro
-//Dan Sze
 //Brendan Courson
 #include "main.h"
 
@@ -34,9 +34,9 @@ int main(int argc, char *argv[])
 
 		char buffer[10000];
 		sprintf(buffer, "Algorithm FCFS\n");
-		sprintf(buffer, "%s-- average CPU burst time: %.2fms\n", buffer, avgCPUBurstTime);
-		sprintf(buffer, "%s-- average wait time: %.2fms\n", buffer, avgWaitTime);
-		sprintf(buffer, "%s-- average turnaround time: %.2fms\n", buffer, avgTurnAroundTime);
+		sprintf(buffer, "%s-- average CPU burst time: %.2f ms\n", buffer, avgCPUBurstTime);
+		sprintf(buffer, "%s-- average wait time: %.2f ms\n", buffer, avgWaitTime);
+		sprintf(buffer, "%s-- average turnaround time: %.2f ms\n", buffer, avgTurnAroundTime);
 		sprintf(buffer, "%s-- total number of context switches: %d\n", buffer, contextSwitches);
 		sprintf(buffer, "%s-- total number of preemptions: %d\n", buffer, preemptions);
 
@@ -53,9 +53,9 @@ int main(int argc, char *argv[])
         SJF(processList, t_cs, avgCPUBurstTime, avgWaitTime, avgTurnAroundTime, contextSwitches);
 
 		sprintf(buffer, "%sAlgorithm SRT\n", buffer);
-		sprintf(buffer, "%s-- average CPU burst time: %.2fms\n", buffer, avgCPUBurstTime);
-		sprintf(buffer, "%s-- average wait time: %.2fms\n", buffer, avgWaitTime);
-		sprintf(buffer, "%s-- average turnaround time: %.2fms\n", buffer, avgTurnAroundTime);
+		sprintf(buffer, "%s-- average CPU burst time: %.2f ms\n", buffer, avgCPUBurstTime);
+		sprintf(buffer, "%s-- average wait time: %.2f ms\n", buffer, avgWaitTime);
+		sprintf(buffer, "%s-- average turnaround time: %.2f ms\n", buffer, avgTurnAroundTime);
 		sprintf(buffer, "%s-- total number of context switches: %d\n", buffer, contextSwitches);
 		sprintf(buffer, "%s-- total number of preemptions: %d\n", buffer, preemptions);
 
