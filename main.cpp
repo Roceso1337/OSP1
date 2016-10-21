@@ -105,6 +105,7 @@ void FCFS(std::deque<process> processList, int t_cs,
 	avgCPUBurstTime=0;
 	int burstCount=0;
 	avgWaitTime=0;
+	int waitCount=0;
 	avgTurnAroundTime=0;
 	contextSwitches=0;
 
@@ -156,18 +157,25 @@ void FCFS(std::deque<process> processList, int t_cs,
 				if(!cpuQ.empty())
 				{
 					ap.setArrivalTime(cpuQ.back().getArrivalTime()+t_cs);
-					//avgWaitTime
+					avgWaitTime+=(cpuQ.back().getArrivalTime()+t_cs)-timeElapsed;
 				}
 				else
 				{
 					if(running.getID() != "")
+					{
 						ap.setArrivalTime(running.getArrivalTime()+(t_cs));
+						avgWaitTime+=(running.getArrivalTime()+(t_cs))-timeElapsed;
+					}
 					else
+					{
 						ap.setArrivalTime(timeElapsed+(t_cs/2));
+						avgWaitTime+=(t_cs/2)-timeElapsed;
+					}
 				}
 
 				//set some data
 				burstCount+=ap.getNumBursts();
+				++waitCount;
 				++contextSwitches;
 				taskCompleted=true;
 
