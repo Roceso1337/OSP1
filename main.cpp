@@ -2,6 +2,10 @@
 
 int main(int argc, char *argv[])
 {
+    int m = 1;
+    int t_cs = 8;
+    int t_slice = 84;
+    
 	if(argc < 3) err("Invalid arguments\n");
 
 	std::string inFname=argv[1];
@@ -28,6 +32,8 @@ int main(int argc, char *argv[])
 		int contextSwitches=0;
 		int preemptions=0;
 
+		roundRobin(processList, t_cs, t_slice);
+
 		FCFS(processList, 8, avgCPUBurstTime, avgWaitTime, avgTurnAroundTime, contextSwitches);
 
 		char buffer[10000];
@@ -40,11 +46,8 @@ int main(int argc, char *argv[])
 
 		fileOutput+=buffer;
 
-        //int n = lines.size();
-        //int m = 1;
-        //int t_cs = 8;
-        //int t_slice = 84;
 
+    	int n = lines.size();
         //SJF(processList, t_cs);
 
 
@@ -438,14 +441,7 @@ void roundRobin(std::deque<process> processList, int t_cs, int t_slice){
 			//update remaining burst time
 			currentProcess->setCpuBurstTimeLeft(currentProcess->getCPUBurstTimeLeft()-t_slice);
 			//check for new process arrival in time slice
-			for (std::deque<process>::iterator itr = processList.begin(); itr != processList.end(); itr++){
-				if (itr->getArrivalTime() <= timeElapsed){
-					readyQueue.push_back(*itr);
-					std::cout << process::printTime(timeElapsed) << " Process " 
-						<< itr->getID() << " arrived " << queueToString(readyQueue) << std::endl;
-					processList.erase(itr);
-				}
-			}
+			checkForNewArrivals(processList, timeElapsed, readyQueue);
 
 			//preemption
 			if(!readyQueue.empty()){ //switch processes if readyQueue is not empty
@@ -465,18 +461,16 @@ void roundRobin(std::deque<process> processList, int t_cs, int t_slice){
 			//update timeElapsed
 			timeElapsed += currentProcess->getCPUBurstTimeLeft();
 			//check for new process arrival in time slice
-			for (std::deque<process>::iterator itr = processList.begin(); itr != processList.end(); itr++){
-				if (itr->getArrivalTime() <= timeElapsed){
-					readyQueue.push_back(*itr);
-					std::cout << process::printTime(timeElapsed) << "Process " 
-						<< itr->getID() << " arrived " << queueToString(readyQueue) << std::endl;
-					processList.erase(itr);
-				}
-			}
-			if(currentProcess->getNumBurstsLeft()-1 > 0){ //still has more burst cycles left
-				currentProcess->decrementNumBurstsLeft();
+			checkForNewArrivals(processList, timeElapsed, readyQueue);
+			currentProcess->decrementNumBurstsLeft();
+			if(currentProcess->getNumBurstsLeft() > 0){ //still has more burst cycles left
 				//reset CPUBurstTimeLeft
 				currentProcess->setCpuBurstTimeLeft(currentProcess->getCPUBurstTime());
+				//print output
+				std::cout << currentProcess->printTime(timeElapsed) << "Process "
+					<< currentProcess->getID() << " completed a CPU burst; " << currentProcess->getNumBurstsLeft()
+					<< " to go " << queueToString(readyQueue) << std::endl;
+
 			}else{ //no more burst cycles left, terminate process
 				//print output
 				std::cout << process::printTime(timeElapsed) << "Process " 
@@ -487,8 +481,6 @@ void roundRobin(std::deque<process> processList, int t_cs, int t_slice){
 				currentProcess = &readyQueue.front();
 				readyQueue.pop_front();
 				
-				//print output
-				std::cout << currentProcess->printTime(timeElapsed) << "Process ";
 			}else{ //readyQueue is empty, continue with process
 
 			}
