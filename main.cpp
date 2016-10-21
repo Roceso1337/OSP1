@@ -2,13 +2,15 @@
 
 int main(int argc, char *argv[])
 {
-	if(argc < 2) err("Invalid arguments\n");
+	if(argc < 3) err("Invalid arguments\n");
 
-	std::string fname=argv[1];
+	std::string inFname=argv[1];
+	std::string outFname=argv[2];
 
-    std::ifstream fd(fname.c_str());
+    std::ifstream fd(inFname.c_str());
     std::string line;
     std::vector<std::string> lines;
+    std::string fileOutput="";
 
 	if(fd != NULL)
 	{
@@ -18,7 +20,24 @@ int main(int argc, char *argv[])
 
 		std::deque<process> processList;
 		process::parse(lines, processList);
-		FCFS(processList, 8);
+
+		float avgCPUBurstTime=0;
+		float avgWaitTime=0;
+		float avgTurnAroundTime=0;
+		int contextSwitches=0;
+		int preemptions=0;
+
+		FCFS(processList, 8, avgCPUBurstTime, avgWaitTime, avgTurnAroundTime, contextSwitches);
+
+		char buffer[10000];
+		sprintf(buffer, "Algorithm FCFS\n");
+		sprintf(buffer, "%s-- average CPU burst time: %.2fms\n", buffer, avgCPUBurstTime);
+		sprintf(buffer, "%s-- average wait time: %.2fms\n", buffer, avgWaitTime);
+		sprintf(buffer, "%s-- average turnaround time: %.2fms\n", buffer, avgTurnAroundTime);
+		sprintf(buffer, "%s-- total number of context switches: %d\n", buffer, contextSwitches);
+		sprintf(buffer, "%s-- total number of preemptions: %d\n", buffer, preemptions);
+
+		fileOutput+=buffer;
 
         //int n = lines.size();
         //int m = 1;
@@ -30,7 +49,29 @@ int main(int argc, char *argv[])
         fd.close();
 	}
 
+	std::ofstream fd2(outFname.c_str());
+
+	if(fd2 != NULL)
+	{
+		fd2.write(fileOutput.c_str(), fileOutput.length());
+		fd2.close();
+	}
+
     return 0;
+}
+
+std::string intTOstring(int number)
+{
+   std::stringstream ss;
+   ss<<number;
+   return ss.str();
+}
+
+std::string floatTOstring(float number)
+{
+   std::stringstream ss;
+   ss<<number;
+   return ss.str();
 }
 
 std::string queueToString(std::deque<process> queue){
@@ -58,8 +99,15 @@ void sortFCFS(std::deque<process>& processList, std::deque<process>& cpuQ, std::
 	std::sort(ioQ.begin(), ioQ.end(), process::FCFSComp);
 }
 
-void FCFS(std::deque<process> processList, int t_cs)
+void FCFS(std::deque<process> processList, int t_cs,
+	float& avgCPUBurstTime, float& avgWaitTime, float& avgTurnAroundTime, int& contextSwitches)
 {
+	avgCPUBurstTime=0;
+	int burstCount=0;
+	avgWaitTime=0;
+	avgTurnAroundTime=0;
+	contextSwitches=0;
+
 	//int m=1;
 	process running=process();
 
@@ -106,7 +154,10 @@ void FCFS(std::deque<process> processList, int t_cs)
 
 				//set the new arrival time
 				if(!cpuQ.empty())
+				{
 					ap.setArrivalTime(cpuQ.back().getArrivalTime()+t_cs);
+					//avgWaitTime
+				}
 				else
 				{
 					if(running.getID() != "")
@@ -116,6 +167,8 @@ void FCFS(std::deque<process> processList, int t_cs)
 				}
 
 				//set some data
+				burstCount+=ap.getNumBursts();
+				++contextSwitches;
 				taskCompleted=true;
 
 				//change the deques
@@ -190,6 +243,7 @@ void FCFS(std::deque<process> processList, int t_cs)
 						cpuQ[i].setArrivalTime(cpuQ[i].getArrivalTime()+cpup.getCPUBurstTime());
 
 					//set some data
+					avgCPUBurstTime+=cpup.getCPUBurstTime();
 					running=cpup;
 					taskCompleted=true;
 
@@ -221,6 +275,7 @@ void FCFS(std::deque<process> processList, int t_cs)
 				}
 
 				//set some data
+				++contextSwitches;
 				taskCompleted=true;
 
 				//change the deques
@@ -238,6 +293,8 @@ void FCFS(std::deque<process> processList, int t_cs)
 	timeElapsed+=4;
 
 	std::cout<<"time "<<timeElapsed<<"ms: Simulator ended for FCFS"<<std::endl;
+
+	avgCPUBurstTime/=burstCount;
 }
 
 // make temporary "current" process
