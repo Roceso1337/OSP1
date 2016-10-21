@@ -7,9 +7,25 @@ process::process()
 	arrivalTime=-1;
     EndTime=-1;
 	cpuBurstTime=-1;
+    timeRunning = -1;
 	numBursts=-1;
     numBurstsLeft=-1;
 	ioTime=-1;
+    ioEndTime=-1;
+}
+
+process::process(const process &oldProcess){
+    id = oldProcess.id;
+    initialArrivalTime = oldProcess.initialArrivalTime;
+    arrivalTime = oldProcess.arrivalTime;
+    cpuBurstTime = oldProcess.cpuBurstTime;    
+    numBursts = oldProcess.numBursts;
+    ioTime = oldProcess.ioTime;
+    ioEndTime = oldProcess.ioEndTime;
+    timeRunning = oldProcess.timeRunning;
+    cpuBurstStart = oldProcess.cpuBurstStart;
+    cpuBurstEnd = oldProcess.cpuBurstEnd;
+    numBurstsLeft = oldProcess.numBurstsLeft;
 }
 
 process::process(std::string newID, int newArrivalTime, int newCPUBurstTime, int newNumBursts, int newIOTime)
@@ -18,7 +34,11 @@ process::process(std::string newID, int newArrivalTime, int newCPUBurstTime, int
     initialArrivalTime=newArrivalTime;
 	arrivalTime=initialArrivalTime;
     EndTime=0;
+    timeRunning = 0;
 	cpuBurstTime=newCPUBurstTime;
+    cpuBurstStart = 0;
+    cpuBurstEnd = 0;
+    ioEndTime = 0;
 	numBursts=newNumBursts;
     numBurstsLeft=numBursts;
 	ioTime=newIOTime;
