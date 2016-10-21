@@ -24,8 +24,6 @@ private:
 	int numBursts;
 	int numBurstsLeft;
 	int ioTime;
-	bool cpu;
-	bool io;
     int timeRunning;
     int cpuBurstStart;
     int cpuBurstEnd;
