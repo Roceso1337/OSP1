@@ -18,13 +18,14 @@ int main(int argc, char *argv[])
 
 		std::deque<process> processList;
 		process::parse(lines, processList);
+		FCFS(processList, 8);
 
-        int n = lines.size();
-        int m = 1;
-        int t_cs = 8;
-        int t_slice = 84;
+        //int n = lines.size();
+        //int m = 1;
+        //int t_cs = 8;
+        //int t_slice = 84;
 
-        SJF(processList, t_cs);
+        //SJF(processList, t_cs);
 
         fd.close();
 	}
@@ -50,21 +51,193 @@ std::string queueToString(std::deque<process> queue){
     return queueString;
 }
 
-void FCFS(std::deque<process> processList)
+void sortFCFS(std::deque<process>& processList, std::deque<process>& cpuQ, std::deque<process>& ioQ)
 {
-	//"run the processes"
-	while(processList.size() > 0)
-	{
-		//set the process variable
-		process p=processList.front();
-		processList.pop_front();
+	std::sort(processList.begin(), processList.end(), process::FCFSComp);
+	std::sort(cpuQ.begin(), cpuQ.end(), process::FCFSComp);
+	std::sort(ioQ.begin(), ioQ.end(), process::FCFSComp);
+}
 
-		//run the process
-		/*for(int i=0;i<process.;++i)
+void FCFS(std::deque<process> processList, int t_cs)
+{
+	//int m=1;
+	process running=process();
+
+	std::deque<process> cpuQ;
+	std::deque<process> ioQ;
+	std::cout<<"time 0ms: Simulator started for FCFS ";
+	std::cout<<queueToString(cpuQ)<<std::endl;
+
+	//sort the processes
+	sortFCFS(processList, cpuQ, ioQ);
+
+	//"run the processes"
+	int timeElapsed=0;
+	while((processList.size() > 0) ||//arrivals
+		(cpuQ.size() > 0) ||//cpu
+		(ioQ.size() > 0) ||//io
+		(running.getID() != ""))//the cpu is still running
+	{
+		process ap;
+		process cpup;
+		process iop;
+		
+		//arrivals
+		if(!processList.empty())
+			ap=processList.front();
+		//cpu
+		if(!cpuQ.empty())
+			cpup=cpuQ.front();
+		//io
+		if(!ioQ.empty())
+			iop=ioQ.front();
+
+		//still have arrivals left
+		bool taskCompleted=false;
+		if(!processList.empty())
 		{
-			//
-		}*/
+			if(((cpuQ.empty()) || (ap.getInitialArrivalTime() < cpup.getArrivalTime())) &&
+				((ioQ.empty()) || (ap.getInitialArrivalTime() < iop.getArrivalTime())))
+			{
+				//set the timeElapsed and print
+				timeElapsed=ap.getInitialArrivalTime();
+				std::cout<<"time "<<timeElapsed<<"ms: ";
+				std::cout<<"Process "<<ap.getID()<<" arrived ";
+
+				//set the new arrival time
+				if(!cpuQ.empty())
+					ap.setArrivalTime(cpuQ.back().getArrivalTime()+t_cs);
+				else
+				{
+					if(running.getID() != "")
+						ap.setArrivalTime(running.getArrivalTime()+(t_cs));
+					else
+						ap.setArrivalTime(timeElapsed+(t_cs/2));
+				}
+
+				//set some data
+				taskCompleted=true;
+
+				//change the deques
+				cpuQ.push_back(ap);
+				processList.pop_front();
+			}
+		}
+
+		if((!taskCompleted) && (running.getID() != ""))//cpu
+		{
+			if(((cpuQ.empty()) || (running.getArrivalTime() < cpup.getArrivalTime())) &&
+				((ioQ.empty()) || (running.getArrivalTime() < iop.getArrivalTime())))
+			{
+				//set the timeElapsed and print
+				timeElapsed=running.getArrivalTime();
+				std::cout<<"time "<<timeElapsed<<"ms: ";
+
+				//do a burst
+				running.decrementNumBurstsLeft();
+
+				//just another burst
+				if(running.getNumBurstsLeft() > 0)
+				{
+					std::cout<<"Process "<<running.getID()<<" completed a CPU burst; ";
+					std::cout<<running.getNumBurstsLeft()<<" to go ";
+					std::cout<<queueToString(cpuQ)<<std::endl;
+
+					//IO blocked
+					std::cout<<"time "<<timeElapsed<<"ms: ";
+					std::cout<<"Process "<<running.getID()<<" blocked on I/O until time ";
+					std::cout<<(timeElapsed+running.getIOTime())<<"ms";
+
+					//set the new arrival time
+					running.setArrivalTime(timeElapsed+running.getIOTime());
+
+					//change the deques
+					ioQ.push_back(running);
+
+					//clear running
+					running=process();
+				}
+				else//no more bursts left
+				{
+					std::cout<<"Process "<<running.getID()<<" terminated ";
+
+					//set the new arrival time
+					running.setArrivalTime(timeElapsed+running.getInitialArrivalTime());
+
+					//clear running
+					running=process();
+				}
+
+				taskCompleted=true;
+			}
+		}
+
+		if((!taskCompleted) && (running.getID() == ""))//cpu start
+		{
+			if(!cpuQ.empty())
+			{
+				if((ioQ.empty()) || (cpup.getArrivalTime() < iop.getArrivalTime()))
+				{
+					//set the timeElapsed and print
+					timeElapsed=cpup.getArrivalTime();
+					std::cout<<"time "<<timeElapsed<<"ms: ";
+
+					std::cout<<"Process "<<cpup.getID()<<" started using the CPU ";
+
+					//set the new arrival times
+					cpup.setArrivalTime(timeElapsed+cpup.getCPUBurstTime());
+					for(unsigned int i=0;i<cpuQ.size();++i)
+						cpuQ[i].setArrivalTime(cpuQ[i].getArrivalTime()+cpup.getCPUBurstTime());
+
+					//set some data
+					running=cpup;
+					taskCompleted=true;
+
+					//change the deques
+					cpuQ.pop_front();
+				}
+			}
+		}
+
+		if(!taskCompleted)//io
+		{
+			if(!ioQ.empty())
+			{
+				//set the timeElapsed and print
+				timeElapsed=iop.getArrivalTime();
+				std::cout<<"time "<<timeElapsed<<"ms: ";
+				std::cout<<"Process "<<iop.getID()<<" completed I/O ";
+
+				//set the new arrival time
+				//set the new arrival time
+				if(!cpuQ.empty())
+					iop.setArrivalTime(cpuQ.back().getArrivalTime()+t_cs);
+				else
+				{
+					if(running.getID() != "")
+						iop.setArrivalTime(running.getArrivalTime()+(t_cs));
+					else
+						iop.setArrivalTime(timeElapsed+(t_cs/2));
+				}
+
+				//set some data
+				taskCompleted=true;
+
+				//change the deques
+				cpuQ.push_back(iop);
+				ioQ.pop_front();
+			}
+		}
+
+		std::cout<<queueToString(cpuQ)<<std::endl;
+
+		//sort
+		sortFCFS(processList, cpuQ, ioQ);
 	}
+
+	timeElapsed+=4;
+
+	std::cout<<"time "<<timeElapsed<<"ms: Simulator ended for FCFS"<<std::endl;
 }
 
 // make temporary "current" process
@@ -128,7 +301,7 @@ void SJF(std::deque<process> processList, int t_cs)
                     ioBlockTime << " " << queueToString(readyQueue) << std::endl;
                 
                 currentProcess->setIOEnd(ioBlockTime);
-                ioQueue->push_back(currentProcess);
+                ioQueue.push_back(*currentProcess);
             }
 
             busy = false;
