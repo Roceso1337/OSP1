@@ -3,42 +3,24 @@
 process::process()
 {
 	id="";
-<<<<<<< HEAD
-	initialArrivalTime=-1;
-	arrivalTime=-1;
-	EndTime=-1;
-	cpuBurstTime=-1;
-	numBursts=-1;
-	numBurstsLeft=-1;
-=======
     initialArrivalTime=-1;
 	arrivalTime=-1;
     EndTime=-1;
 	cpuBurstTime=-1;
 	numBursts=-1;
     numBurstsLeft=-1;
->>>>>>> master
 	ioTime=-1;
 }
 
 process::process(std::string newID, int newArrivalTime, int newCPUBurstTime, int newNumBursts, int newIOTime)
 {
 	id=newID;
-<<<<<<< HEAD
-	initialArrivalTime=newArrivalTime;
-	arrivalTime=initialArrivalTime;
-	EndTime=0;
-	cpuBurstTime=newCPUBurstTime;
-	numBursts=newNumBursts;
-	numBurstsLeft=numBursts;
-=======
     initialArrivalTime=newArrivalTime;
 	arrivalTime=initialArrivalTime;
     EndTime=0;
 	cpuBurstTime=newCPUBurstTime;
 	numBursts=newNumBursts;
     numBurstsLeft=numBursts;
->>>>>>> master
 	ioTime=newIOTime;
     cpuBurstTimeLeft = cpuBurstTime;
 }
@@ -87,10 +69,6 @@ int process::getInitialArrivalTime(){
 	return initialArrivalTime;
 }
 
-int process::getInitialArrivalTime(){
-    return initialArrivalTime;
-}
-
 int process::getArrivalTime(){
 	return arrivalTime;
 }
@@ -119,39 +97,11 @@ int process::getNumBurstsLeft(){
 	return numBurstsLeft;
 }
 
-void process::decrementNumBurstsLeft(){
-    --numBurstsLeft;
-}
-
-int process::getNumBurstsLeft(){
-    return numBurstsLeft;
-}
-
 int process::getIOTime(){
 	return ioTime;
 }
 
 int process::getCpuBurstStart(){
-<<<<<<< HEAD
-	return cpuBurstStart;
-}
-
-int process::getBurstEnd(){
-	return cpuBurstEnd;
-}
-
-void process::setCpuBurstStart(int time){
-	cpuBurstStart = time;
-}
-
-void process::setCpuBurstEnd(int time){ 
-	cpuBurstEnd = time;
-}
-
-void process::setCpuBurstTimeLeft(int newTime){
-    cpuBurstTimeLeft = newTime;
-}
-=======
     return cpuBurstStart;
 }
 
@@ -173,4 +123,7 @@ void process::setCpuBurstStart(int time){
 void process::setCpuBurstEnd(int time){ 
     cpuBurstEnd = time;
 }
->>>>>>> master
+
+void process::setCpuBurstTimeLeft(int newTime){
+    cpuBurstTimeLeft = newTime;
+}

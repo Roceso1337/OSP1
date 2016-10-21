@@ -55,6 +55,8 @@ public:
     void setCpuBurstEnd(int); 
     void increaseTimeRunning() { timeRunning++; }
     void setTimeRunning(int time) { timeRunning = time; }
+    int getCPUBurstTimeLeft();
+    void setCpuBurstTimeLeft(int newTime);
 
 	static bool FCFSComp(const process &p1, const process &p2){
 		if(p1.arrivalTime == p2.arrivalTime) return p1.id < p2.id;
