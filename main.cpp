@@ -219,7 +219,7 @@ void FCFS(std::deque<process> processList, int t_cs,
 					//IO blocked
 					std::cout<<"time "<<timeElapsed<<"ms: ";
 					std::cout<<"Process "<<running.getID()<<" blocked on I/O until time ";
-					std::cout<<(timeElapsed+running.getIOTime())<<"ms";
+					std::cout<<(timeElapsed+running.getIOTime())<<"ms ";
 
 					//set the new arrival time
 					running.setArrivalTime(timeElapsed+running.getIOTime());
@@ -376,7 +376,7 @@ void SJF(std::deque<process> processList, int t_cs, float& avgCPUBurstTime,
 
                 std::cout << process::printTime(timeElapsed) << "Process " <<
                     currentProcess->getID() << " blocked on I/O until time " <<
-                    ioBlockTime << " " << queueToString(*readyQueue) << std::endl;
+                    ioBlockTime << "ms " << queueToString(*readyQueue) << std::endl;
 
                 if (readyQueue->empty())
                     firstProcess = true;
