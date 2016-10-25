@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 
         SJF(processList, t_cs, avgCPUBurstTime, avgWaitTime, avgTurnAroundTime, contextSwitches);
 
-		sprintf(buffer, "%sAlgorithm SRT\n", buffer);
+		sprintf(buffer, "%sAlgorithm SJF\n", buffer);
 		sprintf(buffer, "%s-- average CPU burst time: %.2f ms\n", buffer, avgCPUBurstTime);
 		sprintf(buffer, "%s-- average wait time: %.2f ms\n", buffer, avgWaitTime);
 		sprintf(buffer, "%s-- average turnaround time: %.2f ms\n", buffer, avgTurnAroundTime);
@@ -323,20 +323,18 @@ void FCFS(std::deque<process> processList, int t_cs,
 void SJF(std::deque<process> processList, int t_cs, float& avgCPUBurstTime,
         float& avgWaitTime, float& avgTurnAroundTime, int& contextSwitches)
 {
-	avgCPUBurstTime=0;
 	int burstCount=0;
     int waitCount=0;
-	avgTurnAroundTime=0;
-	contextSwitches=0;
-
     int timeElapsed = 0;
     int initialProcesses = 0;
     process *currentProcess = new process();
     std::deque<process> *readyQueue = new std::deque<process>; 
     std::deque<process> *ioQueue = new std::deque<process>;
     bool busy = false;
-    bool firstProcess = true;
+    bool nonSwitch = true;
+    int numNonSwitches = 0;
 
+    //gathering the total number of bursts
     for (std::deque<process>::iterator itr = processList.begin(); itr != processList.end(); itr++){
         burstCount += itr->getCPUBurstTime()*itr->getNumBursts();
     }
@@ -345,30 +343,37 @@ void SJF(std::deque<process> processList, int t_cs, float& avgCPUBurstTime,
         << queueToString(*readyQueue) << std::endl;
 
     while (1){
+        //check to see if any processes are able to arrive
         for (std::deque<process>::iterator itr = processList.begin(); itr != processList.end(); itr++){
             process *newProc = new process(*itr);
+
             if (itr->getInitialArrivalTime() == timeElapsed){
                 readyQueue->push_back(*newProc);
+                std::sort(readyQueue->begin(), readyQueue->end(), process::SJTComp);
                 std::cout << process::printTime(timeElapsed) << "Process " 
                     << newProc->getID() << " arrived " << queueToString(*readyQueue) << std::endl;
                 initialProcesses++;
                 processList.erase(itr);
 				delete newProc;
             }
-
+            
             if (itr == processList.end())
                 break;
         }
 
         std::sort(readyQueue->begin(), readyQueue->end(), process::SJTComp);
 
+        //process finished
         if (busy && currentProcess->getCPUBurstTime() == currentProcess->getTimeRunning()){
             currentProcess->decrementNumBurstsLeft();
 
+            //no more bursts left
             if (currentProcess->getNumBurstsLeft() == 0){
                 std::cout << process::printTime(timeElapsed) << "Process " << 
                    currentProcess->getID() << " terminated " << queueToString(*readyQueue) << std::endl; 
-            } else {
+            }
+            //process still has some bursts left, block it
+            else { 
                 initialProcesses++;
                 std::cout << process::printTime(timeElapsed) << "Process " << 
                     currentProcess->getID() << " completed a CPU burst; " << 
@@ -381,8 +386,9 @@ void SJF(std::deque<process> processList, int t_cs, float& avgCPUBurstTime,
                     currentProcess->getID() << " blocked on I/O until time " <<
                     ioBlockTime << "ms " << queueToString(*readyQueue) << std::endl;
 
-                if (readyQueue->empty())
-                    firstProcess = true;
+                if (readyQueue->empty()){
+                    nonSwitch = true;
+                }
                 
                 currentProcess->setIOEnd(ioBlockTime);
                 ioQueue->push_back(*currentProcess);
@@ -392,6 +398,7 @@ void SJF(std::deque<process> processList, int t_cs, float& avgCPUBurstTime,
             busy = false;
         }
 
+        //check to see if any IO blocks are finished
         if (!ioQueue->empty()){
             std::sort(ioQueue->begin(), ioQueue->end(), process::IOComp);
             process *io = new process(ioQueue->front());
@@ -399,10 +406,14 @@ void SJF(std::deque<process> processList, int t_cs, float& avgCPUBurstTime,
                 if (io->getNumBurstsLeft() == 0){
                     std::cout << process::printTime(timeElapsed) << "Process " <<
                         io->getID() << " terminated " << queueToString(*readyQueue) << std::endl;
-                } else {
+                }
+                else {
                     io->setTimeRunning(0);
-                    if (!busy && readyQueue->empty())
-                        firstProcess = true;
+
+                    if (!busy && readyQueue->empty()){
+                        nonSwitch = true;
+                    }
+
                     readyQueue->push_back(*io);
                     std::sort(readyQueue->begin(), readyQueue->end(), process::SJTComp);
                     std::cout << process::printTime(timeElapsed) << "Process " <<
@@ -413,23 +424,31 @@ void SJF(std::deque<process> processList, int t_cs, float& avgCPUBurstTime,
             }
             delete io;
         }
-        //can start a new process 
+
+        //can load a new process 
         if (!busy && !readyQueue->empty()){ 
             process *newProc = new process(readyQueue->front());
             *currentProcess = *newProc;
             busy = true; 
             readyQueue->pop_front(); 
             int start = 0; 
-            if (firstProcess){ 
+
+            if (nonSwitch){ 
+                numNonSwitches++;
                 start = timeElapsed + t_cs/2;
-                firstProcess = false; 
-            } else 
+                nonSwitch = false; 
+            }
+            else 
                 start = timeElapsed + t_cs; 
+
             int end = start + currentProcess->getCPUBurstTime();
             currentProcess->setCpuBurstStart(start);
             currentProcess->setCpuBurstEnd(end);
-        } else {
+        }
+        // can start a process
+        else {
             if (timeElapsed == currentProcess->getCpuBurstStart()){
+                contextSwitches++;
                 std::cout << process::printTime(timeElapsed) << "Process " << currentProcess->getID()
                    << " started using the CPU " << queueToString(*readyQueue) << std::endl; 
             }
@@ -441,8 +460,11 @@ void SJF(std::deque<process> processList, int t_cs, float& avgCPUBurstTime,
         }
 
         if (readyQueue->empty() && ioQueue->empty() && !busy){
-            std::cout << process::printTime(timeElapsed+4) << " Simulator ended for SJF" << std::endl;
+            timeElapsed += t_cs/2;
+            std::cout << process::printTime(timeElapsed) << " Simulator ended for SJF" << std::endl;
             delete currentProcess;
+            delete readyQueue;
+            delete ioQueue;
             break;
         }
 
@@ -453,11 +475,10 @@ void SJF(std::deque<process> processList, int t_cs, float& avgCPUBurstTime,
         timeElapsed++;
     }
 
-    avgWaitTime = waitCount/initialProcesses;
-    avgCPUBurstTime = burstCount/initialProcesses;
+    avgWaitTime = (float)waitCount/(float)contextSwitches;
+    avgCPUBurstTime = (float)burstCount/(float)contextSwitches;
     avgTurnAroundTime = ((float)burstCount + (float)waitCount +
-            ((float)initialProcesses*(float)t_cs))/(float)initialProcesses;
-
+            ((float)contextSwitches*(float)t_cs - 0.5*t_cs*numNonSwitches))/(float)contextSwitches;
 } 
 
 void roundRobin(const std::deque<process>& processList)
