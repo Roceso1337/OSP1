@@ -546,16 +546,12 @@ void SJFRR(std::deque<process> processList, int t_cs, int t_slice, float& avgCPU
         timeElapsed++;
     }
 
-    avgWaitTime = (float)waitCount/(float)contextSwitches;
+    avgWaitTime = (float)waitCount/(float)(contextSwitches-preemptions);
     avgCPUBurstTime = (float)burstCount/(float)(contextSwitches-preemptions);
     avgTurnAroundTime = ((float)burstCount + (float)waitCount +
-            ((float)contextSwitches*(float)t_cs - 0.5*t_cs*numNonSwitches))/(float)contextSwitches;
+            ((float)contextSwitches*(float)t_cs - 0.5*t_cs*numNonSwitches)
+            )/(float)(contextSwitches-preemptions);
 } 
-
-void roundRobin(const std::deque<process>& processList)
-{
-	//
-}
 
 void err(const char *msg)
 {
