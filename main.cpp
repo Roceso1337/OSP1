@@ -165,20 +165,23 @@ void FCFS(std::deque<process> processList, int t_cs,
 		process cpup;
 		process iop;
 		
-		//arrivals
+		//first process in arrivals
 		if(!processList.empty())
 			ap=processList.front();
-		//cpu
+		//first process in cpu queue
 		if(!cpuQ.empty())
 			cpup=cpuQ.front();
-		//io
+		//first process in io queue
 		if(!ioQ.empty())
 			iop=ioQ.front();
 
-		//still have arrivals left
+		//we only want to execute one part of the system
 		bool taskCompleted=false;
+		
+		//still have intial process arrivals left
 		if(!processList.empty())
 		{
+			//check if the ap comes before both cpup and iop
 			if(((cpuQ.empty()) || (ap.getInitialArrivalTime() < cpup.getArrivalTime())) &&
 				((ioQ.empty()) || (ap.getInitialArrivalTime() < iop.getArrivalTime())))
 			{
@@ -187,7 +190,7 @@ void FCFS(std::deque<process> processList, int t_cs,
 				std::cout<<"time "<<timeElapsed<<"ms: ";
 				std::cout<<"Process "<<ap.getID()<<" arrived ";
 
-				//set the new arrival time
+				//set the new arrival time of the process
 				if(!cpuQ.empty())
 				{
 					ap.setArrivalTime(cpuQ.back().getArrivalTime()+t_cs);
@@ -197,11 +200,13 @@ void FCFS(std::deque<process> processList, int t_cs,
 				{
 					if(running.getID() != "")
 					{
+						//theres a running process
 						ap.setArrivalTime(running.getArrivalTime()+(t_cs));
 						avgWaitTime+=(running.getArrivalTime()+(t_cs))-timeElapsed;
 					}
 					else
 					{
+						//first or last process
 						ap.setArrivalTime(timeElapsed+(t_cs/2));
 						avgWaitTime+=(t_cs/2);
 					}
@@ -213,7 +218,7 @@ void FCFS(std::deque<process> processList, int t_cs,
 				++contextSwitches;
 				taskCompleted=true;
 
-				//change the deques
+				//add to cpu queue
 				cpuQ.push_back(ap);
 				processList.pop_front();
 			}
@@ -246,10 +251,10 @@ void FCFS(std::deque<process> processList, int t_cs,
 					std::cout<<"Process "<<running.getID()<<" blocked on I/O until time ";
 					std::cout<<(timeElapsed+running.getIOTime())<<"ms ";
 
-					//set the new arrival time
+					//set the new arrival time of the process
 					running.setArrivalTime(timeElapsed+running.getIOTime());
 
-					//change the deques
+					//add to io queue
 					ioQ.push_back(running);
 
 					//clear running
@@ -259,7 +264,7 @@ void FCFS(std::deque<process> processList, int t_cs,
 				{
 					std::cout<<"Process "<<running.getID()<<" terminated ";
 
-					//set the new arrival time
+					//set the new arrival time of the process
 					running.setArrivalTime(timeElapsed+running.getInitialArrivalTime());
 
 					//clear running
@@ -282,8 +287,10 @@ void FCFS(std::deque<process> processList, int t_cs,
 
 					std::cout<<"Process "<<cpup.getID()<<" started using the CPU ";
 
-					//set the new arrival times
+					//set the new arrival time of the processs
 					cpup.setArrivalTime(timeElapsed+cpup.getCPUBurstTime());
+
+					//push back the times of the processes in the cpu queue
 					for(unsigned int i=0;i<cpuQ.size();++i)
 					{
 						cpuQ[i].setArrivalTime(cpuQ[i].getArrivalTime()+cpup.getCPUBurstTime());
@@ -310,8 +317,7 @@ void FCFS(std::deque<process> processList, int t_cs,
 				std::cout<<"time "<<timeElapsed<<"ms: ";
 				std::cout<<"Process "<<iop.getID()<<" completed I/O ";
 
-				//set the new arrival time
-				//set the new arrival time
+				//set the new arrival time of the process
 				if(!cpuQ.empty())
 				{
 					iop.setArrivalTime(cpuQ.back().getArrivalTime()+t_cs);
@@ -321,11 +327,13 @@ void FCFS(std::deque<process> processList, int t_cs,
 				{
 					if(running.getID() != "")
 					{
+						//theres a running process
 						iop.setArrivalTime(running.getArrivalTime()+(t_cs));
 						avgWaitTime+=(running.getArrivalTime()+t_cs)-timeElapsed;
 					}
 					else
 					{
+						//first or last process
 						iop.setArrivalTime(timeElapsed+(t_cs/2));
 						avgWaitTime+=(t_cs/2);
 					}
@@ -336,7 +344,7 @@ void FCFS(std::deque<process> processList, int t_cs,
 				++waitCount;
 				taskCompleted=true;
 
-				//change the deques
+				//add to cpu queue
 				cpuQ.push_back(iop);
 				ioQ.pop_front();
 			}
