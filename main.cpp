@@ -184,7 +184,7 @@ void FCFS(std::deque<process> processList, int t_cs,
 					else
 					{
 						ap.setArrivalTime(timeElapsed+(t_cs/2));
-						avgWaitTime+=(t_cs/2)-timeElapsed;
+						avgWaitTime+=(t_cs/2);
 					}
 				}
 
@@ -202,8 +202,7 @@ void FCFS(std::deque<process> processList, int t_cs,
 
 		if((!taskCompleted) && (running.getID() != ""))//cpu
 		{
-			if(((cpuQ.empty()) || (running.getArrivalTime() < cpup.getArrivalTime())) &&
-				((ioQ.empty()) || (running.getArrivalTime() < iop.getArrivalTime())))
+			if((cpuQ.empty()) || (running.getArrivalTime() < cpup.getArrivalTime()))
 			{
 				//set the timeElapsed and print
 				timeElapsed=running.getArrivalTime();
@@ -263,7 +262,10 @@ void FCFS(std::deque<process> processList, int t_cs,
 					//set the new arrival times
 					cpup.setArrivalTime(timeElapsed+cpup.getCPUBurstTime());
 					for(unsigned int i=0;i<cpuQ.size();++i)
+					{
 						cpuQ[i].setArrivalTime(cpuQ[i].getArrivalTime()+cpup.getCPUBurstTime());
+						avgWaitTime+=(cpup.getCPUBurstTime());
+					}
 
 					//set some data
 					avgCPUBurstTime+=cpup.getCPUBurstTime();
@@ -288,17 +290,27 @@ void FCFS(std::deque<process> processList, int t_cs,
 				//set the new arrival time
 				//set the new arrival time
 				if(!cpuQ.empty())
+				{
 					iop.setArrivalTime(cpuQ.back().getArrivalTime()+t_cs);
+					avgWaitTime+=(cpuQ.back().getArrivalTime()+t_cs)-timeElapsed;
+				}
 				else
 				{
 					if(running.getID() != "")
+					{
 						iop.setArrivalTime(running.getArrivalTime()+(t_cs));
+						avgWaitTime+=(running.getArrivalTime()+t_cs)-timeElapsed;
+					}
 					else
+					{
 						iop.setArrivalTime(timeElapsed+(t_cs/2));
+						avgWaitTime+=(t_cs/2);
+					}
 				}
 
 				//set some data
 				++contextSwitches;
+				++waitCount;
 				taskCompleted=true;
 
 				//change the deques
@@ -318,6 +330,7 @@ void FCFS(std::deque<process> processList, int t_cs,
 	std::cout<<"time "<<timeElapsed<<"ms: Simulator ended for FCFS"<<std::endl;
 
 	avgCPUBurstTime/=burstCount;
+	avgWaitTime/=waitCount;
 }
 
 void SJF(std::deque<process> processList, int t_cs, float& avgCPUBurstTime,
