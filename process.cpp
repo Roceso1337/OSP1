@@ -12,6 +12,7 @@ process::process()
     numBurstsLeft=-1;
 	ioTime=-1;
     ioEndTime=-1;
+    cpuBurstTimeLeft=-1;
 }
 
 process::process(const process &oldProcess){
@@ -26,6 +27,7 @@ process::process(const process &oldProcess){
     cpuBurstStart = oldProcess.cpuBurstStart;
     cpuBurstEnd = oldProcess.cpuBurstEnd;
     numBurstsLeft = oldProcess.numBurstsLeft;
+    cpuBurstTimeLeft = oldProcess.cpuBurstTimeLeft;
 }
 
 process::process(std::string newID, int newArrivalTime, int newCPUBurstTime, int newNumBursts, int newIOTime)

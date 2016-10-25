@@ -21,6 +21,6 @@ void SJF(std::deque<process>, int, float&, float&, float&, int&);
 void roundRobin(std::deque<process> processList, int t_cs, int t_slice);
 void err(const char*);
 void sortRR(std::deque<process>& processList);
-void checkForNewArrivals(std::deque<process> processList, int timeElapsed, std::deque<process> readyQueue);
+void timeChange(std::deque<process>& processList, int& timeElapsed, std::deque<process>& readyQueue, std::deque<process>& IO, int endTime);
 
 #endif
