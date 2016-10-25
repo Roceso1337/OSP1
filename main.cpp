@@ -137,6 +137,7 @@ void FCFS(std::deque<process> processList, int t_cs,
 
 	//"run the processes"
 	int timeElapsed=0;
+	int pSize=processList.size();
 	while((processList.size() > 0) ||//arrivals
 		(cpuQ.size() > 0) ||//cpu
 		(ioQ.size() > 0) ||//io
@@ -207,6 +208,10 @@ void FCFS(std::deque<process> processList, int t_cs,
 				//set the timeElapsed and print
 				timeElapsed=running.getArrivalTime();
 				std::cout<<"time "<<timeElapsed<<"ms: ";
+
+				//for the turnaround time
+				if(running.getNumBurstsLeft() == running.getNumBursts())
+					avgTurnAroundTime+=timeElapsed-running.getInitialArrivalTime();
 
 				//do a burst
 				running.decrementNumBurstsLeft();
@@ -331,6 +336,7 @@ void FCFS(std::deque<process> processList, int t_cs,
 
 	avgCPUBurstTime/=burstCount;
 	avgWaitTime/=waitCount;
+	avgTurnAroundTime/=pSize;
 }
 
 void SJF(std::deque<process> processList, int t_cs, float& avgCPUBurstTime,
