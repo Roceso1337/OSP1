@@ -15,9 +15,7 @@ struct process;
 std::string intTOstring(int);
 std::string floatTOstring(float);
 std::string queueToString(std::deque<process>);
-void sortFCFS(std::deque<process>&, std::deque<process>&, std::deque<process>&);
-void FCFS(std::deque<process>, int, float&, float&, float&, int&);
-void SJFRR(std::deque<process>, int, int, float&, float&, float&, int&, int&, bool);
+void schedule(std::deque<process>, int, int, float&, float&, float&, int&, int&, int);
 void err(const char*);
 
 #endif

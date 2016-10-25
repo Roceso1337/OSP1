@@ -30,7 +30,13 @@ int main(int argc, char *argv[])
 		int contextSwitches=0;
 		int preemptions=0;
 
-		FCFS(processList, 8, avgCPUBurstTime, avgWaitTime, avgTurnAroundTime, contextSwitches);
+		//int n = lines.size();
+        //int m = 1;
+        int t_cs = 8;
+        int t_slice = 84;
+
+		schedule(processList, t_cs, t_slice, avgCPUBurstTime, avgWaitTime,
+                avgTurnAroundTime, contextSwitches, preemptions, 2);
 
 		char buffer[10000];
 		sprintf(buffer, "Algorithm FCFS\n");
@@ -40,19 +46,14 @@ int main(int argc, char *argv[])
 		sprintf(buffer, "%s-- total number of context switches: %d\n", buffer, contextSwitches);
 		sprintf(buffer, "%s-- total number of preemptions: %d\n", buffer, preemptions);
 
-        //int n = lines.size();
-        //int m = 1;
-        int t_cs = 8;
-        int t_slice = 84;
-
 		avgCPUBurstTime=0;
 		avgWaitTime=0;
 		avgTurnAroundTime=0;
 		contextSwitches=0;
 		preemptions=0;
 
-        SJFRR(processList, t_cs, t_slice, avgCPUBurstTime, avgWaitTime,
-                avgTurnAroundTime, contextSwitches, preemptions, false);
+        schedule(processList, t_cs, t_slice, avgCPUBurstTime, avgWaitTime,
+                avgTurnAroundTime, contextSwitches, preemptions, 0);
 
 		sprintf(buffer, "%sAlgorithm SJF\n", buffer);
 		sprintf(buffer, "%s-- average CPU burst time: %.2f ms\n", buffer, avgCPUBurstTime);
@@ -67,8 +68,8 @@ int main(int argc, char *argv[])
 		contextSwitches=0;
 		preemptions=0;
 
-        SJFRR(processList, t_cs, t_slice, avgCPUBurstTime, avgWaitTime,
-                avgTurnAroundTime, contextSwitches, preemptions, true);
+        schedule(processList, t_cs, t_slice, avgCPUBurstTime, avgWaitTime,
+                avgTurnAroundTime, contextSwitches, preemptions, 1);
 
 		sprintf(buffer, "%sAlgorithm RR\n", buffer);
 		sprintf(buffer, "%s-- average CPU burst time: %.2f ms\n", buffer, avgCPUBurstTime);
@@ -125,248 +126,8 @@ std::string queueToString(std::deque<process> queue){
     return queueString;
 }
 
-void sortFCFS(std::deque<process>& processList, std::deque<process>& cpuQ, std::deque<process>& ioQ)
-{
-	std::sort(processList.begin(), processList.end(), process::FCFSComp);
-	std::sort(cpuQ.begin(), cpuQ.end(), process::FCFSComp);
-	std::sort(ioQ.begin(), ioQ.end(), process::FCFSComp);
-}
-
-void FCFS(std::deque<process> processList, int t_cs,
-	float& avgCPUBurstTime, float& avgWaitTime, float& avgTurnAroundTime, int& contextSwitches)
-{
-	avgCPUBurstTime=0;
-	int burstCount=0;
-	avgWaitTime=0;
-	int waitCount=0;
-	avgTurnAroundTime=0;
-	contextSwitches=0;
-
-	//int m=1;
-	process running=process();
-
-	std::deque<process> cpuQ;
-	std::deque<process> ioQ;
-	std::cout<<"time 0ms: Simulator started for FCFS ";
-	std::cout<<queueToString(cpuQ)<<std::endl;
-
-	//sort the processes
-	sortFCFS(processList, cpuQ, ioQ);
-
-	//"run the processes"
-	int timeElapsed=0;
-	int pSize=processList.size();
-	while((processList.size() > 0) ||//arrivals
-		(cpuQ.size() > 0) ||//cpu
-		(ioQ.size() > 0) ||//io
-		(running.getID() != ""))//the cpu is still running
-	{
-		process ap;
-		process cpup;
-		process iop;
-		
-		//first process in arrivals
-		if(!processList.empty())
-			ap=processList.front();
-		//first process in cpu queue
-		if(!cpuQ.empty())
-			cpup=cpuQ.front();
-		//first process in io queue
-		if(!ioQ.empty())
-			iop=ioQ.front();
-
-		//we only want to execute one part of the system
-		bool taskCompleted=false;
-		
-		//still have intial process arrivals left
-		if(!processList.empty())
-		{
-			//check if the ap comes before both cpup and iop
-			if(((cpuQ.empty()) || (ap.getInitialArrivalTime() < cpup.getArrivalTime())) &&
-				((ioQ.empty()) || (ap.getInitialArrivalTime() < iop.getArrivalTime())))
-			{
-				//set the timeElapsed and print
-				timeElapsed=ap.getInitialArrivalTime();
-				std::cout<<"time "<<timeElapsed<<"ms: ";
-				std::cout<<"Process "<<ap.getID()<<" arrived ";
-
-				//set the new arrival time of the process
-				if(!cpuQ.empty())
-				{
-					ap.setArrivalTime(cpuQ.back().getArrivalTime()+t_cs);
-					avgWaitTime+=(cpuQ.back().getArrivalTime()+t_cs)-timeElapsed;
-				}
-				else
-				{
-					if(running.getID() != "")
-					{
-						//theres a running process
-						ap.setArrivalTime(running.getArrivalTime()+(t_cs));
-						avgWaitTime+=(running.getArrivalTime()+(t_cs))-timeElapsed;
-					}
-					else
-					{
-						//first or last process
-						ap.setArrivalTime(timeElapsed+(t_cs/2));
-						avgWaitTime+=(t_cs/2);
-					}
-				}
-
-				//set some data
-				burstCount+=ap.getNumBursts();
-				++waitCount;
-				++contextSwitches;
-				taskCompleted=true;
-
-				//add to cpu queue
-				cpuQ.push_back(ap);
-				processList.pop_front();
-			}
-		}
-
-		if((!taskCompleted) && (running.getID() != ""))//cpu
-		{
-			if((cpuQ.empty()) || (running.getArrivalTime() < cpup.getArrivalTime()))
-			{
-				//set the timeElapsed and print
-				timeElapsed=running.getArrivalTime();
-				std::cout<<"time "<<timeElapsed<<"ms: ";
-
-				//for the turnaround time
-				if(running.getNumBurstsLeft() == running.getNumBursts())
-					avgTurnAroundTime+=timeElapsed-running.getInitialArrivalTime();
-
-				//do a burst
-				running.decrementNumBurstsLeft();
-
-				//just another burst
-				if(running.getNumBurstsLeft() > 0)
-				{
-					std::cout<<"Process "<<running.getID()<<" completed a CPU burst; ";
-					std::cout<<running.getNumBurstsLeft()<<" to go ";
-					std::cout<<queueToString(cpuQ)<<std::endl;
-
-					//IO blocked
-					std::cout<<"time "<<timeElapsed<<"ms: ";
-					std::cout<<"Process "<<running.getID()<<" blocked on I/O until time ";
-					std::cout<<(timeElapsed+running.getIOTime())<<"ms ";
-
-					//set the new arrival time of the process
-					running.setArrivalTime(timeElapsed+running.getIOTime());
-
-					//add to io queue
-					ioQ.push_back(running);
-
-					//clear running
-					running=process();
-				}
-				else//no more bursts left
-				{
-					std::cout<<"Process "<<running.getID()<<" terminated ";
-
-					//set the new arrival time of the process
-					running.setArrivalTime(timeElapsed+running.getInitialArrivalTime());
-
-					//clear running
-					running=process();
-				}
-
-				taskCompleted=true;
-			}
-		}
-
-		if((!taskCompleted) && (running.getID() == ""))//cpu start
-		{
-			if(!cpuQ.empty())
-			{
-				if((ioQ.empty()) || (cpup.getArrivalTime() < iop.getArrivalTime()))
-				{
-					//set the timeElapsed and print
-					timeElapsed=cpup.getArrivalTime();
-					std::cout<<"time "<<timeElapsed<<"ms: ";
-
-					std::cout<<"Process "<<cpup.getID()<<" started using the CPU ";
-
-					//set the new arrival time of the processs
-					cpup.setArrivalTime(timeElapsed+cpup.getCPUBurstTime());
-
-					//push back the times of the processes in the cpu queue
-					for(unsigned int i=0;i<cpuQ.size();++i)
-					{
-						cpuQ[i].setArrivalTime(cpuQ[i].getArrivalTime()+cpup.getCPUBurstTime());
-						avgWaitTime+=(cpup.getCPUBurstTime());
-					}
-
-					//set some data
-					avgCPUBurstTime+=cpup.getCPUBurstTime();
-					running=cpup;
-					taskCompleted=true;
-
-					//change the deques
-					cpuQ.pop_front();
-				}
-			}
-		}
-
-		if(!taskCompleted)//io
-		{
-			if(!ioQ.empty())
-			{
-				//set the timeElapsed and print
-				timeElapsed=iop.getArrivalTime();
-				std::cout<<"time "<<timeElapsed<<"ms: ";
-				std::cout<<"Process "<<iop.getID()<<" completed I/O ";
-
-				//set the new arrival time of the process
-				if(!cpuQ.empty())
-				{
-					iop.setArrivalTime(cpuQ.back().getArrivalTime()+t_cs);
-					avgWaitTime+=(cpuQ.back().getArrivalTime()+t_cs)-timeElapsed;
-				}
-				else
-				{
-					if(running.getID() != "")
-					{
-						//theres a running process
-						iop.setArrivalTime(running.getArrivalTime()+(t_cs));
-						avgWaitTime+=(running.getArrivalTime()+t_cs)-timeElapsed;
-					}
-					else
-					{
-						//first or last process
-						iop.setArrivalTime(timeElapsed+(t_cs/2));
-						avgWaitTime+=(t_cs/2);
-					}
-				}
-
-				//set some data
-				++contextSwitches;
-				++waitCount;
-				taskCompleted=true;
-
-				//add to cpu queue
-				cpuQ.push_back(iop);
-				ioQ.pop_front();
-			}
-		}
-
-		std::cout<<queueToString(cpuQ)<<std::endl;
-
-		//sort
-		sortFCFS(processList, cpuQ, ioQ);
-	}
-
-	timeElapsed+=4;
-
-	std::cout<<"time "<<timeElapsed<<"ms: Simulator ended for FCFS"<<std::endl;
-
-	avgCPUBurstTime/=burstCount;
-	avgWaitTime/=waitCount;
-	avgTurnAroundTime/=pSize;
-}
-
-void SJFRR(std::deque<process> processList, int t_cs, int t_slice, float& avgCPUBurstTime,
-        float& avgWaitTime, float& avgTurnAroundTime, int& contextSwitches, int& preemptions, bool rrFlag)
+void schedule(std::deque<process> processList, int t_cs, int t_slice, float& avgCPUBurstTime,
+        float& avgWaitTime, float& avgTurnAroundTime, int& contextSwitches, int& preemptions, int rrFlag)
 {
 	int burstCount=0;
     int waitCount=0;
@@ -381,10 +142,12 @@ void SJFRR(std::deque<process> processList, int t_cs, int t_slice, float& avgCPU
     int rrCounter = 0;
     std::string mode = "";
 
-    if (!rrFlag)
+    if (rrFlag == 0)
         mode = "SJF";
-    else
+    else if (rrFlag == 1)
         mode = "RR";
+    else if (rrFlag == 2)
+        mode = "FCFS";
 
     //gathering the total number of bursts
     for (std::deque<process>::iterator itr = processList.begin(); itr != processList.end(); itr++){
@@ -402,7 +165,7 @@ void SJFRR(std::deque<process> processList, int t_cs, int t_slice, float& avgCPU
             if (itr->getInitialArrivalTime() == timeElapsed){
                 readyQueue->push_back(*newProc);
 
-                if (!rrFlag)
+                if (rrFlag == 0)
                     std::sort(readyQueue->begin(), readyQueue->end(), process::SJTComp);
                 else
                     std::sort(readyQueue->begin(), readyQueue->end(), process::FCFSComp);
@@ -418,7 +181,7 @@ void SJFRR(std::deque<process> processList, int t_cs, int t_slice, float& avgCPU
                 break;
         }
 
-        if (!rrFlag)
+        if (rrFlag == 0)
             std::sort(readyQueue->begin(), readyQueue->end(), process::SJTComp);
 
         //process finished
@@ -457,7 +220,7 @@ void SJFRR(std::deque<process> processList, int t_cs, int t_slice, float& avgCPU
             busy = false;
         }
 
-        if (busy && rrFlag && rrCounter%t_slice==0 && rrCounter != 0){
+        if (busy && (rrFlag == 1) && rrCounter%t_slice==0 && rrCounter != 0){
             if (!readyQueue->empty()){
                 process *newProc = new process(readyQueue->front());
                 readyQueue->push_back(*currentProcess);
@@ -496,7 +259,7 @@ void SJFRR(std::deque<process> processList, int t_cs, int t_slice, float& avgCPU
 
                     readyQueue->push_back(*io);
                     
-                    if (!rrFlag)
+                    if (rrFlag == 0)
                         std::sort(readyQueue->begin(), readyQueue->end(), process::SJTComp);
 
                     std::cout << process::printTime(timeElapsed) << "Process " <<
