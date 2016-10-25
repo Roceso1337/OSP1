@@ -12,6 +12,7 @@ process::process()
     numBurstsLeft=-1;
 	ioTime=-1;
     ioEndTime=-1;
+    cpuBurstTimeLeft=-1;
 }
 
 process::process(const process &oldProcess){
@@ -26,6 +27,7 @@ process::process(const process &oldProcess){
     cpuBurstStart = oldProcess.cpuBurstStart;
     cpuBurstEnd = oldProcess.cpuBurstEnd;
     numBurstsLeft = oldProcess.numBurstsLeft;
+    cpuBurstTimeLeft = oldProcess.cpuBurstTimeLeft;
 }
 
 process::process(std::string newID, int newArrivalTime, int newCPUBurstTime, int newNumBursts, int newIOTime)
@@ -42,6 +44,7 @@ process::process(std::string newID, int newArrivalTime, int newCPUBurstTime, int
 	numBursts=newNumBursts;
     numBurstsLeft=numBursts;
 	ioTime=newIOTime;
+    cpuBurstTimeLeft = cpuBurstTime;
 }
 
 void process::parse(std::vector<std::string>& text, std::deque<process>& processList)
@@ -81,39 +84,43 @@ void process::parse(std::vector<std::string>& text, std::deque<process>& process
 }
 
 std::string process::getID(){
-    return id;
+	return id;
 }
 
 int process::getInitialArrivalTime(){
-    return initialArrivalTime;
+	return initialArrivalTime;
 }
 
 int process::getArrivalTime(){
-    return arrivalTime;
+	return arrivalTime;
 }
 
 void process::setArrivalTime(int newArrivalTime){
-    arrivalTime=newArrivalTime;
+	arrivalTime=newArrivalTime;
 }
 
 int process::getCPUBurstTime(){
-    return cpuBurstTime;
+	return cpuBurstTime;
+}
+
+int process::getCPUBurstTimeLeft(){
+    return cpuBurstTimeLeft;
 }
 
 int process::getNumBursts(){
-    return numBursts;
+	return numBursts;
 }
 
 void process::decrementNumBurstsLeft(){
-    --numBurstsLeft;
+	--numBurstsLeft;
 }
 
 int process::getNumBurstsLeft(){
-    return numBurstsLeft;
+	return numBurstsLeft;
 }
 
 int process::getIOTime(){
-    return ioTime;
+	return ioTime;
 }
 
 int process::getCpuBurstStart(){
@@ -137,4 +144,8 @@ void process::setCpuBurstStart(int time){
 
 void process::setCpuBurstEnd(int time){ 
     cpuBurstEnd = time;
+}
+
+void process::setCpuBurstTimeLeft(int newTime){
+    cpuBurstTimeLeft = newTime;
 }

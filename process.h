@@ -30,6 +30,7 @@ private:
     int cpuBurstStart;
     int cpuBurstEnd;
     int ioEndTime;
+    int cpuBurstTimeLeft; //for RR
 
 public:
 
@@ -38,6 +39,7 @@ public:
     process(const process&);
 	process(std::string, int, int, int, int);
 	static void parse(std::vector<std::string>&, std::deque<process>&);
+
     std::string getID();
     int getInitialArrivalTime();
     int getArrivalTime();
@@ -56,6 +58,8 @@ public:
     void setCpuBurstEnd(int); 
     void increaseTimeRunning() { timeRunning++; }
     void setTimeRunning(int time) { timeRunning = time; }
+    int getCPUBurstTimeLeft();
+    void setCpuBurstTimeLeft(int newTime);
 
 	static bool FCFSComp(const process &p1, const process &p2){
 		if(p1.arrivalTime == p2.arrivalTime) return p1.id < p2.id;

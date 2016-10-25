@@ -5,6 +5,10 @@
 
 int main(int argc, char *argv[])
 {
+    int m = 1;
+    int t_cs = 8;
+    int t_slice = 84;
+    
 	if(argc < 3) err("Invalid arguments\n");
 
 	std::string inFname=argv[1];
@@ -17,18 +21,21 @@ int main(int argc, char *argv[])
 
 	if(fd != NULL)
 	{
-        while (std::getline(fd, line)){
-            lines.push_back(line);
-        }
+		while (std::getline(fd, line)){
+			lines.push_back(line);
+		}
 
 		std::deque<process> processList;
 		process::parse(lines, processList);
+
 
 		float avgCPUBurstTime=0;
 		float avgWaitTime=0;
 		float avgTurnAroundTime=0;
 		int contextSwitches=0;
 		int preemptions=0;
+
+		
 
 		FCFS(processList, 8, avgCPUBurstTime, avgWaitTime, avgTurnAroundTime, contextSwitches);
 
@@ -39,6 +46,8 @@ int main(int argc, char *argv[])
 		sprintf(buffer, "%s-- average turnaround time: %.2f ms\n", buffer, avgTurnAroundTime);
 		sprintf(buffer, "%s-- total number of context switches: %d\n", buffer, contextSwitches);
 		sprintf(buffer, "%s-- total number of preemptions: %d\n", buffer, preemptions);
+
+		fileOutput+=buffer;
 
         //int n = lines.size();
         //int m = 1;
@@ -61,7 +70,8 @@ int main(int argc, char *argv[])
 
 		fileOutput+=buffer;
 
-        fd.close();
+
+		fd.close();
 	}
 
 	std::ofstream fd2(outFname.c_str());
@@ -90,22 +100,23 @@ std::string floatTOstring(float number)
 }
 
 std::string queueToString(std::deque<process> queue){
-    if (queue.empty()){
-        return "[Q empty]";
-    }
-    std::string queueString = "[Q ";
+	if (queue.empty()){
+		return "[Q empty]";
+	}
+	std::string queueString = "[Q ";
 
-    while (!queue.empty()){
-        queueString += queue.front().getID();
-        queue.pop_front();
+	while (!queue.empty()){
+		queueString += queue.front().getID();
+		queue.pop_front();
 
-        if (!queue.empty())
-            queueString += " ";
-    }
-    
-    queueString += "]";
-    return queueString;
+		if (!queue.empty())
+			queueString += " ";
+	}
+	
+	queueString += "]";
+	return queueString;
 }
+
 
 void sortFCFS(std::deque<process>& processList, std::deque<process>& cpuQ, std::deque<process>& ioQ)
 {
@@ -125,6 +136,7 @@ void FCFS(std::deque<process> processList, int t_cs,
 	contextSwitches=0;
 
 	//int m=1;
+
 	process running=process();
 
 	std::deque<process> cpuQ;
@@ -133,6 +145,7 @@ void FCFS(std::deque<process> processList, int t_cs,
 	std::cout<<queueToString(cpuQ)<<std::endl;
 
 	//sort the processes
+
 	sortFCFS(processList, cpuQ, ioQ);
 
 	//"run the processes"
@@ -220,6 +233,7 @@ void FCFS(std::deque<process> processList, int t_cs,
 
 					//IO blocked
 					std::cout<<"time "<<timeElapsed<<"ms: ";
+
 					std::cout<<"Process "<<running.getID()<<" blocked on I/O until time ";
 					std::cout<<(timeElapsed+running.getIOTime())<<"ms ";
 
@@ -323,6 +337,7 @@ void FCFS(std::deque<process> processList, int t_cs,
 
 		//sort
 		sortFCFS(processList, cpuQ, ioQ);
+
 	}
 
 	timeElapsed+=4;
@@ -333,9 +348,12 @@ void FCFS(std::deque<process> processList, int t_cs,
 	avgWaitTime/=waitCount;
 }
 
+
 void SJF(std::deque<process> processList, int t_cs, float& avgCPUBurstTime,
+
         float& avgWaitTime, float& avgTurnAroundTime, int& contextSwitches)
 {
+
 	int burstCount=0;
     int waitCount=0;
     int timeElapsed = 0;
@@ -488,16 +506,19 @@ void SJF(std::deque<process> processList, int t_cs, float& avgCPUBurstTime,
         timeElapsed++;
     }
 
+
     avgWaitTime = (float)waitCount/(float)contextSwitches;
     avgCPUBurstTime = (float)burstCount/(float)contextSwitches;
     avgTurnAroundTime = ((float)burstCount + (float)waitCount +
             ((float)contextSwitches*(float)t_cs - 0.5*t_cs*numNonSwitches))/(float)contextSwitches;
 } 
 
-void roundRobin(const std::deque<process>& processList)
-{
-	//
+
+void sortRR(std::deque<process>& processList){
+	std::sort(processList.begin(), processList.end(), process::FCFSComp);
 }
+
+
 
 void err(const char *msg)
 {
