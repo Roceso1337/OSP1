@@ -1,6 +1,18 @@
 Algorithm FCFS
+<<<<<<< HEAD
 -- average CPU burst time: 403.85ms
 -- average wait time: 730.00ms
 -- average turnaround time: 0.00ms
+=======
+-- average CPU burst time: 403.85 ms
+-- average wait time: 636.46 ms
+-- average turnaround time: 0.00 ms
+-- total number of context switches: 13
+-- total number of preemptions: 0
+Algorithm SJF
+-- average CPU burst time: 403.85 ms
+-- average wait time: 354.54 ms
+-- average turnaround time: 764.54 ms
+>>>>>>> master
 -- total number of context switches: 13
 -- total number of preemptions: 0
