@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 		schedule(processList, t_cs, t_slice, avgCPUBurstTime, avgWaitTime,
                 avgTurnAroundTime, contextSwitches, preemptions, 2);
 
-		char buffer[10000];
+		char buffer[20000];
 		sprintf(buffer, "Algorithm FCFS\n");
 		sprintf(buffer, "%s-- average CPU burst time: %.2f ms\n", buffer, avgCPUBurstTime);
 		sprintf(buffer, "%s-- average wait time: %.2f ms\n", buffer, avgWaitTime);
@@ -207,7 +207,7 @@ void schedule(std::deque<process> processList, int t_cs, int t_slice, float& avg
                     currentProcess->getID() << " blocked on I/O until time " <<
                     ioBlockTime << "ms " << queueToString(*readyQueue) << std::endl;
 
-                if (readyQueue->empty()){
+                if (!busy && readyQueue->empty()){
                     nonSwitch = true;
                 }
                 
@@ -227,7 +227,7 @@ void schedule(std::deque<process> processList, int t_cs, int t_slice, float& avg
                 int timeLeft = currentProcess->getCPUBurstTime() - currentProcess->getTimeRunning();
 
                 std::cout << process::printTime(timeElapsed) << "Time slice expired; process " <<
-                    newProc->getID() << " prempted with " << timeLeft << "ms to go " 
+                    currentProcess->getID() << " preempted with " << timeLeft << "ms to go " 
                     << queueToString(*readyQueue) << std::endl;
 
                 busy = false;
@@ -236,7 +236,7 @@ void schedule(std::deque<process> processList, int t_cs, int t_slice, float& avg
                 delete newProc;
             } else {
                 std::cout << process::printTime(timeElapsed) << "Time slice expired; no preemption" <<
-                   " because the ready queue is empty " << queueToString(*readyQueue) << std::endl;
+                   " because ready queue is empty " << queueToString(*readyQueue) << std::endl;
                 rrCounter = 0;
             }
         }
@@ -308,7 +308,7 @@ void schedule(std::deque<process> processList, int t_cs, int t_slice, float& avg
 
         if (readyQueue->empty() && ioQueue->empty() && !busy){
             timeElapsed += t_cs/2;
-            std::cout << process::printTime(timeElapsed) << " Simulator ended for " << mode << std::endl;
+            std::cout << process::printTime(timeElapsed) << "Simulator ended for " << mode << std::endl;
             delete currentProcess;
             delete readyQueue;
             delete ioQueue;
