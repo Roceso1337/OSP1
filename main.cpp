@@ -271,7 +271,6 @@ void schedule(std::deque<process> processList, int t_cs, int t_slice, float& avg
             }
         }
 
-
         //can load a new process 
         if (!busy && !readyQueue->empty()){ 
             process *newProc = new process(readyQueue->front());
