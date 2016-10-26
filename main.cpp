@@ -184,6 +184,36 @@ void schedule(std::deque<process> processList, int t_cs, int t_slice, float& avg
         if (rrFlag == 0)
             std::sort(readyQueue->begin(), readyQueue->end(), process::SJTComp);
 
+        //check to see if any IO blocks are finished
+        if (!ioQueue->empty()){
+            std::sort(ioQueue->begin(), ioQueue->end(), process::IOComp);
+            process *io = new process(ioQueue->front());
+            if (timeElapsed == io->getIOEnd()){
+                if (io->getNumBurstsLeft() == 0){
+                    std::cout << process::printTime(timeElapsed) << "Process " <<
+                        io->getID() << " terminated " << queueToString(*readyQueue) << std::endl;
+                }
+                else {
+                    io->setTimeRunning(0);
+
+                    if (!busy && readyQueue->empty()){
+                        nonSwitch = true;
+                    }
+
+                    readyQueue->push_back(*io);
+                    
+                    if (rrFlag == 0)
+                        std::sort(readyQueue->begin(), readyQueue->end(), process::SJTComp);
+
+                    std::cout << process::printTime(timeElapsed) << "Process " <<
+                        io->getID() << " completed I/O " << queueToString(*readyQueue) << std::endl;
+
+                }
+                ioQueue->pop_front();
+            }
+            delete io;
+        }
+
         //process finished
         if (busy && currentProcess->getCPUBurstTime() == currentProcess->getTimeRunning()){
             currentProcess->decrementNumBurstsLeft();
@@ -241,35 +271,6 @@ void schedule(std::deque<process> processList, int t_cs, int t_slice, float& avg
             }
         }
 
-        //check to see if any IO blocks are finished
-        if (!ioQueue->empty()){
-            std::sort(ioQueue->begin(), ioQueue->end(), process::IOComp);
-            process *io = new process(ioQueue->front());
-            if (timeElapsed == io->getIOEnd()){
-                if (io->getNumBurstsLeft() == 0){
-                    std::cout << process::printTime(timeElapsed) << "Process " <<
-                        io->getID() << " terminated " << queueToString(*readyQueue) << std::endl;
-                }
-                else {
-                    io->setTimeRunning(0);
-
-                    if (!busy && readyQueue->empty()){
-                        nonSwitch = true;
-                    }
-
-                    readyQueue->push_back(*io);
-                    
-                    if (rrFlag == 0)
-                        std::sort(readyQueue->begin(), readyQueue->end(), process::SJTComp);
-
-                    std::cout << process::printTime(timeElapsed) << "Process " <<
-                        io->getID() << " completed I/O " << queueToString(*readyQueue) << std::endl;
-
-                }
-                ioQueue->pop_front();
-            }
-            delete io;
-        }
 
         //can load a new process 
         if (!busy && !readyQueue->empty()){ 
